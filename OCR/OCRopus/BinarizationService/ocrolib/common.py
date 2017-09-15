@@ -153,7 +153,7 @@ def isintarray(a):
 def isintegerarray(a):
     return a.dtype in [dtype('int32'),dtype('int64'),dtype('uint32'),dtype('uint64')]
 
-#@checks(str,pageno=int,_=GRAYSCALE) (Annoted by Jingchao Luan)
+@checks({str,object},pageno=int,_=GRAYSCALE) #(Annoted by Jingchao Luan)
 def read_image_gray(fname,pageno=0):
     """Read an image and returns it as a floating point array.
     The optional page number allows images from files containing multiple
@@ -162,7 +162,10 @@ def read_image_gray(fname,pageno=0):
 
     if type(fname)==tuple: fname,pageno = fname
     assert pageno==0
-    pil = PIL.Image.open(fname)
+    if(type(fname)==PIL.Image.Image):
+        pil = fname
+    else:
+        pil = PIL.Image.open(fname)
     a = pil2array(pil)
     if a.dtype==dtype('uint8'):
         a = a/255.0
