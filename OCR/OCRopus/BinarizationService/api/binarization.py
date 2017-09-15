@@ -51,10 +51,6 @@ def binarization_exec(image, parameters):
     print("=====Parameters Values =====")
     print(args)
     print("============================")
-    
-    if len(image) < 1:
-        print("ERROR: Please upload an image")
-        return None
 
     # Unicode to str
     #image = str(image)

@@ -40,18 +40,20 @@ def validate_image_extension(value):
 
 ### Resize the image size to meet the smallest size requirment of binarization: 600*600 pixels
 ### Resize by adding a white backgroud border, but not to strech the original image
-def resize_image(imagepath):
-    fd_img = open(imagepath, 'r')
-    img = Image.open(fd_img)
+def resize_image(image):
+    #fd_img = open(imagepath, 'r')
+    img = Image.open(image)
     w, h = img.size
     if w<600 or h<600:
         if w<600: w = 600
         if h<600: h = 600
         new_size = [w, h]
         new_image = resizeimage.resize_contain(img, new_size)
-        new_image.save(imagepath, new_image.format) # override the original image
-        fd_img.close()
+        return new_image
+        #new_image.save(image, new_image.format) # override the original image
+        #fd_img.close()
     else:
+        return image
         pass
 
 
