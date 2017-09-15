@@ -27,7 +27,10 @@
             2) Optional. Specified parameter valuses which are listed in the following part, and send them in form style.</p>
         <p>3. Output: </p>
         <p class="two_tab"> A zip file contains all output files related to the uploaded image. Usually they are named as {<i>imagename</i>}.txt [, {<i>imagename</i>}.prob, and {<i>imagename</i>}.llocs if related parameters have been set].</p>
-        <p>4. E.g. curl -F "<font color="red">image</font>=@<i>path_to_image</i>" -F "<font color="red">probabilities</font>=True" -o <i>name_of_output_file</i> http://10.5.146.92:8003/recognitionapi</p>
+        <p>4. Example: </p>
+        <p class="two_tab"> 
+            1) Using script "call_recog_service.py" under directory "OCR/OCRopus/" directly, with command "python call_recog_service.py -h" to check how to use. <font color="red">Remenber</font> to change the IP and PORT inside the script.<br> 
+            2) Using curl command. E.g. curl -F "<font color="red">image</font>=@<i>path_to_image</i>" -F "<font color="red">probabilities</font>=True" -o <i>name_of_output_file</i> http://10.5.146.92:8003/recognitionapi</p>
         
         <h4>PARAMETERS (#5)</h4>
         <table border="1" cellspacing="0" >
@@ -71,7 +74,7 @@
 
         <h4><font color="red">NOTE</font></h4>
         <p>
-            1) The uploaded image must be an binarized singal-line image, and with name/key 'image'.<br> 
+            1) For curl command, the uploaded image must be an binarized singal-line image, and with name/key 'image'.<br> 
             2) The specified parameters' name must be same with names listed in the above table.</p>
     </body>
 </html>

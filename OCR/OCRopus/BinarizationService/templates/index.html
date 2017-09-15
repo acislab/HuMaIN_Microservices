@@ -26,8 +26,11 @@
             1) The path of an origial image, uploaded in form style. <br>
             2) Optional. Specified parameter valuses which are listed in the following table, and send them in form style.</p>
         <p>3. Output: </p>
-        <p class="two_tab"> An binarized image. Usually it is named as {<i>imagename</i>}.bin.png</p>
-        <p>4. E.g. curl -F "<font color="red">image</font>=@<i>path_to_image</i>" -F "<font color="red">threshold</font>=0.5" -o <i>name_of_output_file</i> http://10.5.146.92:8001/binarizationapi</p>
+        <p class="two_tab"> An binarized image. Usually it is named as {<i>imagename</i>}_bin.png</p>
+        <p>4. Example: </p>
+        <p class="two_tab"> 
+            1) Using script "call_bin_service.py" under directory "OCR/OCRopus/" directly, with command "python call_bin_service.py -h" to check how to use. <font color="red">Remenber</font> to change the IP and PORT inside the script.<br>
+            2) Using curl command. E.g. curl -F "<font color="red">image</font>=@<i>path_to_image</i>" -F "<font color="red">threshold</font>=0.5" -o <i>name_of_output_file</i> http://10.5.146.92:8001/binarizationapi</p>
         
         <h4>PARAMETERS (#10)</h4>
         <table border="1" cellspacing="0" >
@@ -100,7 +103,7 @@
         </table>
         
         <h4><font color="red">NOTE</font></h4>
-        <p> 1) The uploaded image's name/key must be 'image'.</p>
+        <p> 1) For curl command, the uploaded image's name/key must be 'image'.</p>
         <p> 2) The specified parameters' name/key must be same with names listed in the above table.</p>
     </body>
 </html>
