@@ -46,7 +46,7 @@ from ocrolib.exceptions import OcropusException
 from ocrolib.toplevel import *
 from numpy import amax, amin
 from django.conf import settings
-import logging
+import logging, time
 
 dataDir = settings.MEDIA_ROOT
 # 'args_default' only contains the parameters that cannot be set by users
@@ -72,21 +72,14 @@ def segmentation_exec(image, parameters):
     global args
     args = args_default.copy()
     args.update(parameters)
-    print("=====Parameters Values =====")
-    print(args)
-    print("============================")
-
-    if len(image) < 1:
-        print("ERROR: Please upload an image")
-        return None
-
-    # Unicode to str
-    #image = str(image)
+    #print("=====Parameters Values =====")
+    #print(args)
+    #print("============================")
 
     # Segment the image
-    output_list = []
+    output_dic = {} # key: single-line image name. value: single-line image object
     try:
-        output_list = process(image)
+        output_dic = process(image)
     except OcropusException as e:
         if e.trace:
             traceback.print_exc()
@@ -95,7 +88,7 @@ def segmentation_exec(image, parameters):
     except Exception as e:
         traceback.print_exc()
     
-    return output_list
+    return output_dic
 
 
 def norm_max(v):
@@ -321,13 +314,14 @@ def compute_segmentation(binary,scale):
 
 def process(image):
     imagename_base, ext = os.path.splitext(str(image))
-    outputdir = os.path.join(dataDir, imagename_base)
+    #outputdir = os.path.join(dataDir, imagename_base)
 
     try:
         binary = ocrolib.read_image_binary(image)
     except IOError:
         if ocrolib.trace: traceback.print_exc()
-        logger.error("cannot open %s" % (image))
+        print_error("cannot open %s" % (image))
+        #logger.error("cannot open %s" % (image))
         return
 
     checktype(binary,ABINARY2)
@@ -335,7 +329,8 @@ def process(image):
     if not args['nocheck']:
         check = check_page(amax(binary)-binary)
         if check is not None:
-            logger.error("%s SKIPPED %s (use -n to disable this check)" % (image, check))
+            print_error("%s SKIPPED %s (use -n to disable this check)" % (image, check))
+            #logger.error("%s SKIPPED %s (use -n to disable this check)" % (image, check))
             return
 
     binary = 1-binary # invert
@@ -344,24 +339,34 @@ def process(image):
         scale = psegutils.estimate_scale(binary)
     else:
         scale = args['scale']
-    logger.info("scale %f" % (scale))
+    #logger.info("scale %f" % (scale))
+    print_info("scale %f" % (scale))
     if isnan(scale) or scale>1000.0:
-        logger.error("%s: bad scale (%g); skipping\n" % (image, scale))
+        print_error("%s: bad scale (%g); skipping\n" % (image, scale))
+        #logger.error("%s: bad scale (%g); skipping\n" % (image, scale))
         return
     if scale<args['minscale']:
-        logger.error("%s: scale (%g) less than --minscale; skipping\n" % (image, scale))
+        print_error("%s: scale (%g) less than --minscale; skipping\n" % (image, scale))
+        #logger.error("%s: scale (%g) less than --minscale; skipping\n" % (image, scale))
         return
 
     # find columns and text lines
-    if not args['quiet']: logger.info("computing segmentation")
+    if not args['quiet']: 
+        print_info("computing segmentation")
+        #logger.info("computing segmentation")
     segmentation = compute_segmentation(binary,scale)
     if amax(segmentation)>args['maxlines']:
-        logger.error("%s: too many lines %g" % (image, amax(segmentation)))
+        #logger.error("%s: too many lines %g" % (image, amax(segmentation)))
+        print_error("%s: too many lines %g" % (image, amax(segmentation)))
         return
-    if not args['quiet']: logger.info("number of lines %g" % amax(segmentation))
+    if not args['quiet']: 
+        print_info("number of lines %g" % amax(segmentation))
+        #logger.info("number of lines %g" % amax(segmentation))
 
     # compute the reading order
-    if not args['quiet']: logger.info("finding reading order")
+    if not args['quiet']: 
+        print_info("finding reading order")
+        #logger.info("finding reading order")
     lines = psegutils.compute_lines(segmentation,scale)
     order = psegutils.reading_order([l.bounds for l in lines])
     lsort = psegutils.topsort(order)
@@ -373,13 +378,16 @@ def process(image):
     segmentation = renumber[segmentation]
 
     # finally, output everything
-    if not args['quiet']: logger.info("writing lines")
-    if not os.path.exists(outputdir):
-        os.mkdir(outputdir)
+    if not args['quiet']: 
+        print_info("writing lines")
+        #logger.info("writing lines")
+    #if not os.path.exists(outputdir):
+    #    os.mkdir(outputdir)
     lines = [lines[i] for i in lsort]
     #ocrolib.write_page_segmentation("%s.pseg.png"%outputdir,segmentation)
     cleaned = ocrolib.remove_noise(binary,args['noise'])
 
+    """
     ### Return image files list (in disk)
     # write into output list
     output_list = []
@@ -394,16 +402,18 @@ def process(image):
     """
 
     ### Return image objects dictionary (in memory)
-    output_dic = {}  # key: line NO. value: single-line image object
+    output_dic = {}  # key: single-line image name. value: single-line image object
+    time_1 = time.time()
     for index, line in enumerate(lines):
         binline = psegutils.extract_masked(1-cleaned,line,pad=args['pad'],expand=args['expand'])
         assert binline.ndim==2
         midrange = 0.5*(amin(binline)+amax(binline))
         image_array = array(255*(binline>midrange),'B')
         image_pil = ocrolib.array2pil(image_array)
-        output_dic[index] = image_pil
-    logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
-    print("=== dic ===")
-    print(output_dic)
+        key = imagename_base + "_%d.png" % (index+1)
+        output_dic[key] = image_pil
+    #logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
+    print_info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
+    print("Time writing to disk: %.2f" %(time.time()-time_1))
     return output_dic
-    """
+    

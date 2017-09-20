@@ -36,6 +36,7 @@ from .extrafunc import del_service_files
 import sys, os, os.path, zipfile, StringIO
 import time
 import logging
+import tarfile, io
 
 
 # Get the directory which stores all input and output files
@@ -65,12 +66,10 @@ def segmentationView(request, format=None):
     image_object = request.FILES['image']
     ### Call segmentation function
     seg_begin = time.time()
-    #imagepath = projectDir + paras_serializer.data['image']
-    output_list = segmentation_exec(image_object, paras_serializer.data)
-    # output_dic: key--line NO. value--line image object
-    #output_dic = segmentation_exec(image_object, paras_serializer.data)
+    # output_dic: key--single-line image name. value--line image object
+    output_dic = segmentation_exec(image_object, paras_serializer.data)
     seg_end = time.time()
-    if not output_list: # if output_list is empty
+    if not output_dic: # if output_list is empty
         Parameters.objects.filter(id=paras_serializer.data['id']).delete()
         del_service_files(dataDir)
         logger.error("sth wrong with segmentation")
@@ -80,37 +79,29 @@ def segmentationView(request, format=None):
     # Folder name in ZIP archive which contains the above files
     imagename_base, ext = os.path.splitext(str(image_object))
     zip_dir = imagename_base+"_seg"
-    zip_filename = "%s.zip" % zip_dir
+    zip_name = "%s.zip" % zip_dir
     # Open StringIO to grab in-memory ZIP contents
     strio = StringIO.StringIO()
     # The zip compressor
     zf = zipfile.ZipFile(strio, "w")
 
-    ### Zip multiple image files from disk
-    for fpath in output_list:
-        # Caculate path for file in zip
-        fdir, fname = os.path.split(fpath)
-        zip_path = os.path.join(zip_dir, fname)
-        # Add file, at correct path
-        zf.write(fpath, zip_path)
-    """
-    ### Zip multiple image objects from memory
+    # Zip multiple image objects from memory
     for key in output_dic:
-        line_name = str(image_object)+str(key)+".png"
-        zip_path = os.path.join(zip_dir, line_name)
-        zf.write(output_dic[key], zip_path)
-    """
+        # Save single-line image object in memory as png format
+        line_image_io = StringIO.StringIO()
+        output_dic[key].save(line_image_io, 'png')    
+        zip_path = os.path.join(zip_dir, key)
+        zf.writestr(zip_path, line_image_io.getvalue())
     zf.close()
+
     # Grab ZIP file from in-memory, make response with correct MIME-type
-    response = HttpResponse(strio.getvalue(), content_type="application/x-zip-compressed")
+    response = HttpResponse(strio.getvalue(), content_type="application/x-zip")
     # And correct content-disposition
-    response["Content-Disposition"] = 'attachment; filename=%s' % zip_filename
+    response["Content-Disposition"] = 'attachment; filename=%s' % zip_name
     
     ### Delete all datas generated during this service
     # Delete data in database
     Parameters.objects.filter(id=paras_serializer.data['id']).delete()
-    # Delete files in local storage
-    del_service_files(dataDir)
 
     send_resp = time.time()
     logger.info("===== Image %s =====" % str(image_object))
