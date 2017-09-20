@@ -162,7 +162,7 @@ def read_image_gray(fname,pageno=0):
 
     if type(fname)==tuple: fname,pageno = fname
     assert pageno==0
-    if(type(fname)==PIL.Image.Image):
+    if type(fname)==PIL.Image.Image:
         pil = fname
     else:
         pil = PIL.Image.open(fname)
