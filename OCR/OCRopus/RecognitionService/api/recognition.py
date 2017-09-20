@@ -67,16 +67,9 @@ def recognition_exec(image, parameters, *model):
     for m in model:
         if m is not None:
             args.update({'model': m})
-    #print("=====Parameters Values =====")
-    #print(args)
-    #print("============================")
-
-    if len(image) < 1:
-        print("ERROR: Please upload an image")
-        return None
-
-    # Unicode to str
-    #image = str(image)
+    print("=====Parameters Values =====")
+    print(args)
+    print("============================")
 
     # Get the line normalizer
     get_linenormalizer()
@@ -152,8 +145,8 @@ def process(image):
     recog_list = []
     imagename_base, ext = os.path.splitext(str(image))
     outputpath_base = os.path.join(dataDir, imagename_base)
-    #base,_ = ocrolib.allsplitext(image)
 
+    print(type(image))
     line = ocrolib.read_image_gray(image)
     raw_line = line.copy()
     if prod(line.shape)==0: return None

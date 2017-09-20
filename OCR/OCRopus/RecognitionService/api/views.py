@@ -38,6 +38,7 @@ from .extrafunc import del_service_files
 import sys, os, os.path, zipfile, StringIO, glob
 import time
 import logging
+from PIL import Image
 
 # Get the directory which stores all input and output files
 dataDir = settings.MEDIA_ROOT
@@ -62,7 +63,7 @@ def recognitionView(request, format=None):
         logger.error(paras_serializer.errors)
         return Response(paras_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 	
-    image_object = request.FILES['image']
+    image_uploaded = request.FILES['image']
 
     ### Seperately receive model set by user
     modelpath = None
@@ -86,7 +87,7 @@ def recognitionView(request, format=None):
     # Folder name in ZIP archive which contains the above files
     imagename_base, ext = os.path.splitext(str(image_object))
     zip_dir = imagename_base+"_recog"
-    zip_filename = "%s.zip" % zip_dir
+    zip_name = "%s.zip" % zip_dir
     # Open StringIO to grab in-memory ZIP contents
     strio = StringIO.StringIO()
     # The zip compressor
@@ -103,11 +104,13 @@ def recognitionView(request, format=None):
     # Grab ZIP file from in-memory, make response with correct MIME-type
     response = HttpResponse(strio.getvalue(), content_type="application/x-zip-compressed")
     # And correct content-disposition
-    response["Content-Disposition"] = 'attachment; filename=%s' % zip_filename
+    response["Content-Disposition"] = 'attachment; filename=%s' % zip_name
 
     # Delete all files related to this service
     Parameters.objects.filter(id=paras_serializer.data['id']).delete()
-    del_service_files(dataDir)
+    for fpath in outputfiles:
+        del_service_files(fpath)
+
 
     send_resp = time.time()
     logger.info("===== Image %s =====" % str(image_object))
