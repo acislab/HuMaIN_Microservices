@@ -14,13 +14,14 @@ def validate_image_extension(value):
 
 
 # Delete all files related to this service time, including inputs and outputs
-def del_service_files(dataDir):
-    for the_file in os.listdir(dataDir):
-        file_path = os.path.join(dataDir, the_file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print(e)
+def del_service_files(path):
+    try:
+        if os.path.isfile(path):
+            os.unlink(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
+        else:
+            print("Error: Path %s was not found" % (path))
+            sys.exit()
+    except Exception as e:
+        print(e)
