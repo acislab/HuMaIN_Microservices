@@ -70,9 +70,7 @@ def binarizationView(request, format=None):
     
     ### Resize the image if its size smaller than 600*600
     try:
-        print(type(image_object))
         image_object = resize_image(image_object)
-        print(type(image_object))
     except:
         Parameters.objects.filter(id=paras_serializer.data['id']).delete()
         return Response("ERROR: Re-size image error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
