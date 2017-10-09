@@ -67,17 +67,14 @@ def recognition_exec(image, parameters, *model):
     for m in model:
         if m is not None:
             args.update({'model': m})
-    print("=====Parameters Values =====")
-    print(args)
-    print("============================")
 
     # Get the line normalizer
     get_linenormalizer()
 
     # Recognize the single-line image
-    recog_list = []
+    recog_dic = []
     try:
-        recog_list = process(image)
+        recog_dic = process(image)
     except OcropusException as e:
         if e.trace:
             traceback.print_exc()
@@ -86,7 +83,7 @@ def recognition_exec(image, parameters, *model):
     except Exception as e:
         traceback.print_exc()
     
-    return recog_list
+    return recog_dic
 
 
 def print_info(*objs):
@@ -139,14 +136,14 @@ def get_linenormalizer():
         lnorm.setHeight(args['height'])  
 
 
-
 # process one image
 def process(image):
-    recog_list = []
-    imagename_base, ext = os.path.splitext(str(image))
-    outputpath_base = os.path.join(dataDir, imagename_base)
+    # output dictionary. key: file type (e.g., txt, llocs, and prob). value: contents in memory
+    # 'txt' related to recognized characters
+    # 'llocs' related to recognized LSTM locations of characters
+    # 'prob' related to character probabilities/accuracy
+    output_dic = {} 
 
-    print(type(image))
     line = ocrolib.read_image_gray(image)
     raw_line = line.copy()
     if prod(line.shape)==0: return None
@@ -166,37 +163,35 @@ def process(image):
     line = lstm.prepare_line(line,args['pad'])
     pred = network.predictString(line)
 
+    ### output recognized LSTM locations of characters
     if args['llocs']:
-        # output recognized LSTM locations of characters
         result = lstm.translate_back(network.outputs,pos=1)
         scale = len(raw_line.T)*1.0/(len(network.outputs)-2*args['pad'])
-        recog_llocs = outputpath_base+".llocs"
-        with codecs.open(output_llocs,"w","utf-8") as locs:
-            for r,c in result:
+        llocs_str = ''
+        for r,c in result:
                 c = network.l2s([c])
                 r = (r-args['pad'])*scale
-                locs.write("%s\t%.1f\n"%(c,r))
-            recog_list.append(recog_llocs)
-                #plot([r,r],[0,20],'r' if c==" " else 'b')
-        #ginput(1,1000)
+                llcos_c = "%s\t%.1f\n" %(c,r)
+                llocs_str += llcos_c.encode('UTF-8')
+        output_dic['llocs'] = llocs_str
 
+    ### output character probabilities
     if args['probabilities']:
-        # output character probabilities
         result = lstm.translate_back(network.outputs,pos=2)
-        recog_prob = outputpath_base+".prob"
-        with codecs.open(recog_prob,"w","utf-8") as file:
-            for c,p in result:
-                c = network.l2s([c])
-                file.write("%s\t%s\n"%(c,p))
-            recog_list.append(recog_prob)
+        prob_str = ''
+        for c,p in result:
+            c = network.l2s([c])
+            llcos_c = "%s\t%.2f\n" %(c,p)
+            prob_str += llcos_c.encode('UTF-8')
+        output_dic['prob'] = prob_str
 
     if not args['nonormalize']:
         pred = ocrolib.normalize_text(pred)
 
     if not args['quiet']:
         logger.info(str(image)+": "+pred)
-    recog_text = outputpath_base+".txt"
-    ocrolib.write_text(recog_text,pred)
-    recog_list.append(recog_text)
+    
+    ### output recognized contents
+    output_dic['txt'] = pred.encode('UTF-8')
 
-    return recog_list
+    return output_dic

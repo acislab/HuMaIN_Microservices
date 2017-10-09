@@ -40,7 +40,8 @@ import time
 import logging
 from PIL import Image
 
-# Get the directory which stores all input and output files
+
+# Get the directory which stores the model set by user
 dataDir = settings.MEDIA_ROOT
 
 def index(request):
@@ -63,23 +64,24 @@ def recognitionView(request, format=None):
         logger.error(paras_serializer.errors)
         return Response(paras_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 	
-    image_uploaded = request.FILES['image']
+    image_object = request.FILES['image']
 
     ### Seperately receive model set by user
     modelpath = None
     if request.data.get('model') is not None: 
-        # model set by user
         model = request.data.get('model')
         modelpath = dataDir+"/"+str(model)
         default_storage.save(modelpath, model)
 
     ### Call OCR recognition function
     recog_begin = time.time()
-    outputfiles = recognition_exec(image_object, paras_serializer.data, modelpath)
+    # output dic. key: file type (e.g., content-.txt, locaton-.llocs, and probability-.prob). value: contents in memory
+    recog_dic = recognition_exec(image_object, paras_serializer.data, modelpath)
     recog_end = time.time()
-    if not outputfiles: # if outputfiles is emplty
+    if not recog_dic: # if output is emplty
         Parameters.objects.filter(id=paras_serializer.data['id']).delete()
-        del_service_files(dataDir)
+        if modelpath is not None:
+            del_service_files(modelpath)
         logger.error("sth wrong with recognition")
         return Response("ERROR: sth wrong with segmentation", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -88,29 +90,25 @@ def recognitionView(request, format=None):
     imagename_base, ext = os.path.splitext(str(image_object))
     zip_dir = imagename_base+"_recog"
     zip_name = "%s.zip" % zip_dir
-    # Open StringIO to grab in-memory ZIP contents
-    strio = StringIO.StringIO()
-    # The zip compressor
-    zf = zipfile.ZipFile(strio, "w")
+    strio = StringIO.StringIO()      # Open StringIO to grab in-memory ZIP contents
+    zf = zipfile.ZipFile(strio, "w") # The zip compressor
 
-    for fpath in outputfiles:
-        # Caculate path for file in zip
-        fdir, fname = os.path.split(fpath)
-        zip_path = os.path.join(zip_dir, fname)
-        # Add file, at correct path
-        zf.write(fpath, zip_path)
+    for key in recog_dic:
+        filename = imagename_base + '.' + key 
+        zip_path = os.path.join(zip_dir, filename)
+        zf.writestr(zip_path, recog_dic[key])
 
     zf.close()
     # Grab ZIP file from in-memory, make response with correct MIME-type
-    response = HttpResponse(strio.getvalue(), content_type="application/x-zip-compressed")
+    response = HttpResponse(strio.getvalue(), content_type="application/x-zip")
     # And correct content-disposition
     response["Content-Disposition"] = 'attachment; filename=%s' % zip_name
 
     # Delete all files related to this service
     Parameters.objects.filter(id=paras_serializer.data['id']).delete()
-    for fpath in outputfiles:
-        del_service_files(fpath)
-
+    # Delete recognized model if it was uploaded by user
+    if modelpath is not None:
+            del_service_files(modelpath)
 
     send_resp = time.time()
     logger.info("===== Image %s =====" % str(image_object))
