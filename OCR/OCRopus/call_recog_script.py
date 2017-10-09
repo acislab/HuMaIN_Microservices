@@ -51,8 +51,8 @@ parser.add_argument('-m','--model',default=argparse.SUPPRESS, help="line recogni
 parser.add_argument("-l","--height",default=argparse.SUPPRESS,type=int, help="target line height (overrides recognizer)")
 parser.add_argument("-p","--pad",default=argparse.SUPPRESS,type=int, help="extra blank padding to the left and right of text line")
 parser.add_argument('-N',"--nonormalize", type=str2bool, help="don't normalize the textual output from the recognizer")
-parser.add_argument('--llocs', type=str2bool, help="output LSTM locations for characters")
-parser.add_argument('--probabilities', type=str2bool, help="output probabilities for each letter")
+parser.add_argument('-llocs','--llocs', type=str2bool, help="output LSTM locations for characters")
+parser.add_argument('-prob','--probabilities', type=str2bool, help="output probabilities for each letter")
 
 args = parser.parse_args()
 

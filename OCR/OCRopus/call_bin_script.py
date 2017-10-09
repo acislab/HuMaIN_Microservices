@@ -44,8 +44,8 @@ parser.add_argument('-b','--bignore',type=float,default=argparse.SUPPRESS, help=
 parser.add_argument('-p','--perc',type=float,default=argparse.SUPPRESS, help='percentage for filters')
 parser.add_argument('-r','--range',type=int,default=argparse.SUPPRESS, help='range for filters')
 parser.add_argument('-m','--maxskew',type=float,default=argparse.SUPPRESS, help='skew angle estimation parameters (degrees)')
-parser.add_argument('--lo',type=float,default=argparse.SUPPRESS, help='percentile for black estimation')
-parser.add_argument('--hi',type=float,default=argparse.SUPPRESS, help='percentile for white estimation')
+parser.add_argument('-lo','--lo',type=float,default=argparse.SUPPRESS, help='percentile for black estimation')
+parser.add_argument('-hi','--hi',type=float,default=argparse.SUPPRESS, help='percentile for white estimation')
 parser.add_argument('--skewsteps',type=int,default=argparse.SUPPRESS, help='steps for skew angle estimation (per degree)')
 
 args = parser.parse_args()
