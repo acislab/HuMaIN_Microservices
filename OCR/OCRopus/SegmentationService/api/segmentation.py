@@ -403,7 +403,6 @@ def process(image):
 
     ### Return image objects dictionary (in memory)
     output_dic = {}  # key: single-line image name. value: single-line image object
-    time_1 = time.time()
     for index, line in enumerate(lines):
         binline = psegutils.extract_masked(1-cleaned,line,pad=args['pad'],expand=args['expand'])
         assert binline.ndim==2
@@ -414,6 +413,5 @@ def process(image):
         output_dic[key] = image_pil
     #logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
     print_info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
-    print("Time writing to disk: %.2f" %(time.time()-time_1))
     return output_dic
     
