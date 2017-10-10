@@ -72,9 +72,6 @@ def segmentation_exec(image, parameters):
     global args
     args = args_default.copy()
     args.update(parameters)
-    #print("=====Parameters Values =====")
-    #print(args)
-    #print("============================")
 
     # Segment the image
     output_dic = {} # key: single-line image name. value: single-line image object
@@ -314,14 +311,12 @@ def compute_segmentation(binary,scale):
 
 def process(image):
     imagename_base, ext = os.path.splitext(str(image))
-    #outputdir = os.path.join(dataDir, imagename_base)
 
     try:
         binary = ocrolib.read_image_binary(image)
     except IOError:
         if ocrolib.trace: traceback.print_exc()
-        print_error("cannot open %s" % (image))
-        #logger.error("cannot open %s" % (image))
+        logger.error("cannot open %s" % (image))
         return
 
     checktype(binary,ABINARY2)
@@ -329,8 +324,7 @@ def process(image):
     if not args['nocheck']:
         check = check_page(amax(binary)-binary)
         if check is not None:
-            print_error("%s SKIPPED %s (use -n to disable this check)" % (image, check))
-            #logger.error("%s SKIPPED %s (use -n to disable this check)" % (image, check))
+            logger.error("%s SKIPPED %s (use -n to disable this check)" % (image, check))
             return
 
     binary = 1-binary # invert
@@ -339,34 +333,27 @@ def process(image):
         scale = psegutils.estimate_scale(binary)
     else:
         scale = args['scale']
-    #logger.info("scale %f" % (scale))
-    print_info("scale %f" % (scale))
+    logger.info("scale %f" % (scale))
     if isnan(scale) or scale>1000.0:
-        print_error("%s: bad scale (%g); skipping\n" % (image, scale))
-        #logger.error("%s: bad scale (%g); skipping\n" % (image, scale))
+        logger.error("%s: bad scale (%g); skipping\n" % (image, scale))
         return
     if scale<args['minscale']:
-        print_error("%s: scale (%g) less than --minscale; skipping\n" % (image, scale))
-        #logger.error("%s: scale (%g) less than --minscale; skipping\n" % (image, scale))
+        logger.error("%s: scale (%g) less than --minscale; skipping\n" % (image, scale))
         return
 
     # find columns and text lines
     if not args['quiet']: 
-        print_info("computing segmentation")
-        #logger.info("computing segmentation")
+        logger.info("computing segmentation")
     segmentation = compute_segmentation(binary,scale)
     if amax(segmentation)>args['maxlines']:
-        #logger.error("%s: too many lines %g" % (image, amax(segmentation)))
-        print_error("%s: too many lines %g" % (image, amax(segmentation)))
+        logger.error("%s: too many lines %g" % (image, amax(segmentation)))
         return
     if not args['quiet']: 
-        print_info("number of lines %g" % amax(segmentation))
-        #logger.info("number of lines %g" % amax(segmentation))
+        logger.info("number of lines %g" % amax(segmentation))
 
     # compute the reading order
     if not args['quiet']: 
-        print_info("finding reading order")
-        #logger.info("finding reading order")
+        logger.info("finding reading order")
     lines = psegutils.compute_lines(segmentation,scale)
     order = psegutils.reading_order([l.bounds for l in lines])
     lsort = psegutils.topsort(order)
@@ -379,27 +366,10 @@ def process(image):
 
     # finally, output everything
     if not args['quiet']: 
-        print_info("writing lines")
-        #logger.info("writing lines")
-    #if not os.path.exists(outputdir):
-    #    os.mkdir(outputdir)
+        logger.info("writing lines")
     lines = [lines[i] for i in lsort]
-    #ocrolib.write_page_segmentation("%s.pseg.png"%outputdir,segmentation)
     cleaned = ocrolib.remove_noise(binary,args['noise'])
 
-    """
-    ### Return image files list (in disk)
-    # write into output list
-    output_list = []
-    outputpath_base = os.path.join(outputdir,imagename_base)
-    for i,l in enumerate(lines):
-        binline = psegutils.extract_masked(1-cleaned,l,pad=args['pad'],expand=args['expand'])
-        output_line = outputpath_base + "_%d.png" % (i+1)
-        ocrolib.write_image_binary(output_line, binline)
-        output_list.append(output_line)
-    logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
-    return output_list
-    """
 
     ### Return image objects dictionary (in memory)
     output_dic = {}  # key: single-line image name. value: single-line image object
@@ -411,7 +381,7 @@ def process(image):
         image_pil = ocrolib.array2pil(image_array)
         key = imagename_base + "_%d.png" % (index+1)
         output_dic[key] = image_pil
-    #logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
-    print_info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
+    logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
+
     return output_dic
     

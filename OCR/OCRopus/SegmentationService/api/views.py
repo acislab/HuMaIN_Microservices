@@ -80,10 +80,8 @@ def segmentationView(request, format=None):
     imagename_base, ext = os.path.splitext(str(image_object))
     zip_dir = imagename_base+"_seg"
     zip_name = "%s.zip" % zip_dir
-    # Open StringIO to grab in-memory ZIP contents
-    strio = StringIO.StringIO()
-    # The zip compressor
-    zf = zipfile.ZipFile(strio, "w")
+    strio = StringIO.StringIO()      # Open StringIO to grab in-memory ZIP contents
+    zf = zipfile.ZipFile(strio, "w") # The zip compressor
 
     # Zip multiple image objects from memory
     for key in output_dic:
