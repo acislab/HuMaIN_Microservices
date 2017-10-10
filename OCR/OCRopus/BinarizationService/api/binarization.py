@@ -48,12 +48,6 @@ def binarization_exec(image, parameters):
     global args
     args = args_default.copy()
     args.update(parameters)
-    print("=====Parameters Values =====")
-    print(args)
-    print("============================")
-
-    # Unicode to str
-    #image = str(image)
 
     # Binarize the image
     try:
@@ -170,6 +164,7 @@ def process(imagepath):
         est = est[v]
     lo = stats.scoreatpercentile(est.ravel(),args['lo'])
     hi = stats.scoreatpercentile(est.ravel(),args['hi'])
+    
     # rescale the image to get the gray scale image
     logger.info("rescaling")
     flat -= lo
@@ -177,23 +172,13 @@ def process(imagepath):
     flat = clip(flat,0,1)
     bin = 1*(flat>args['threshold'])
 
-    
-    # output the normalized grayscale and the thresholded image
     logger.info("%s lo-hi (%.2f %.2f) angle %4.1f %s" % (imagepath, lo, hi, angle, comment))
     logger.info("writing")
-
-    """
-    ### Return image file path in disk (write to disk firstly)
-    base,_ = ocrolib.allsplitext(imagepath)
-    outputfile_bin = base+"_bin.png"
-    ocrolib.write_image_binary(outputfile_bin, bin)
-    return outputfile_bin
-    """
     
     ### Return image object directly (in memory)
     assert bin.ndim==2
     midrange = 0.5*(amin(bin)+amax(bin))
     image_array = array(255*(bin>midrange),'B') # wrong if call "ocrlib.midrange()"
     image_pil = array2pil(image_array)  # wrong if call "ocrlib.array2pil()"
+
     return image_pil
-    
