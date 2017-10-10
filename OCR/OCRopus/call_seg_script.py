@@ -131,7 +131,7 @@ if __name__ == '__main__':
 			image_path = os.path.join(image, image_name)
 			# One image failed do not affect the process of other images
 			try:
-				print("\n===== %s ======" % image)
+				print("\n===== %s ======" % image_name)
 				call_seg(image_path, dstDir, args)
 			except:
 				pass
@@ -139,4 +139,4 @@ if __name__ == '__main__':
 		parser.print_help()
 		sys.exit(0)
 
-	print("*** Over all invoke time: %.2f seconds ***\n" % (time.time() - start_time))
+	print("\n*** Over all invoke time: %.2f seconds ***\n" % (time.time() - start_time))

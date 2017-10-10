@@ -117,4 +117,4 @@ if __name__ == '__main__':
 		parser.print_help()
 		sys.exit(0)
 	
-	print("*** Over all invoke time: %.2f seconds ***\n" % (time.time() - start_time))
+	print("\n*** Over all invoke time: %.2f seconds ***\n" % (time.time() - start_time))
