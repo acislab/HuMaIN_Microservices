@@ -48,7 +48,7 @@ from numpy import amax, amin
 from django.conf import settings
 import logging, time
 
-dataDir = settings.MEDIA_ROOT
+
 # 'args_default' only contains the parameters that cannot be set by users
 args_default = {
     # output parameters
@@ -79,11 +79,11 @@ def segmentation_exec(image, parameters):
         output_dic = process(image)
     except OcropusException as e:
         if e.trace:
-            traceback.print_exc()
+            traceback.logger.exc()
         else:
             logger.info(image+":"+e)
     except Exception as e:
-        traceback.print_exc()
+        traceback.logger.exc()
     
     return output_dic
 
@@ -196,12 +196,12 @@ def compute_colseps(binary,scale):
     logger.info("considering at most %g whitespace column separators" % args['maxcolseps'])
     colseps = compute_colseps_conv(binary,scale)
     DSAVE("colwsseps",0.7*colseps+0.3*binary)
-    
-    logger.info("considering at most %g black column separators" % args['maxseps'])
-    seps = compute_separators_morph(binary,scale)
-    DSAVE("colseps",0.7*seps+0.3*binary)
-    colseps = maximum(colseps,seps)
-    binary = minimum(binary,1-seps)
+    if args['maxseps']>0:
+        logger.info("considering at most %g black column separators" % args['maxseps'])
+        seps = compute_separators_morph(binary,scale)
+        DSAVE("colseps",0.7*seps+0.3*binary)
+        colseps = maximum(colseps,seps)
+        binary = minimum(binary,1-seps)
     return colseps,binary
 
 
@@ -315,7 +315,7 @@ def process(image):
     try:
         binary = ocrolib.read_image_binary(image)
     except IOError:
-        if ocrolib.trace: traceback.print_exc()
+        if ocrolib.trace: traceback.logger.exc()
         logger.error("cannot open %s" % (image))
         return
 
@@ -384,4 +384,3 @@ def process(image):
     logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
 
     return output_dic
-    
