@@ -87,7 +87,7 @@ def segmentationView(request, format=None):
     for key in output_dic:
         # Save single-line image object in memory as png format
         line_image_io = StringIO.StringIO()
-        output_dic[key].save(line_image_io, 'png')    
+        output_dic[key].save(line_image_io, 'png')
         zip_path = os.path.join(zip_dir, key)
         zf.writestr(zip_path, line_image_io.getvalue())
     zf.close()
