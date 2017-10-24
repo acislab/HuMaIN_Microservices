@@ -27,14 +27,34 @@ import os, os.path
 from scipy.ndimage import filters, interpolation, morphology, measurements
 from scipy import stats
 import ocrolib
-import StringIO, PIL, numpy
+import PIL, numpy
 from numpy import amax, amin
 import logging
 
 
-# 'args_default' only contains the parameters that cannot be set by users
+"""
+Image binarization using non-linear processing.
+This is a compute-intensive binarization method that works on degraded
+and historical book pages.
+"""
+
+### The default parameters values
 args_default = {
-'nocheck':True  # disable error checking on inputs
+# The following 10 parameters can be overwritten by users
+'threshold':0.5, # threshold, determines lightness
+'zoom':0.5,      # zoom for page background estimation
+'escale':1.0,    # scale for estimating a mask over the text region
+'bignore':0.1,   # ignore this much of the border for threshold estimation
+'perc':80.0,     # percentage for filters
+'range':20,      # range for filters
+'maxskew':2.0,   # skew angle estimation parameters
+'lo':5.0,        # percentile for black estimation
+'hi':90.0,       # percentile for white estimation
+'skewsteps':8,   # steps for skew angle estimation (per degree)
+
+# The following parameters needn't be overwritten by users
+'nocheck':True,  # disable error checking on inputs
+#'parallel':0     # number of parallel processes to use
 }
 
 # The global variable

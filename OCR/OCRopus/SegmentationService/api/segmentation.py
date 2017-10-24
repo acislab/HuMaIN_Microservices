@@ -49,16 +49,40 @@ from django.conf import settings
 import logging, time
 
 
-# 'args_default' only contains the parameters that cannot be set by users
+# The default parameters values
 args_default = {
+    ### The following 12 parameters can be set by user
+    # limits
+    'minscale':1.0,  # minimum scale permitted
+    'maxlines':300,  # maximum # lines permitted
+
+    # scale parameters
+    'scale':0.0,     # the basic scale of the document (roughly, xheight) 0=automatic
+    'hscale':1.0,    # non-standard scaling of horizontal parameters
+    'vscale':1.0,    # non-standard scaling of vertical parameters
+
+    # line parameters
+    'threshold':0.2, # baseline threshold
+    'noise':8,       # noise threshold for removing small components from lines
+    'usegauss':False, # use gaussian instead of uniform
+
+    # column separator parameters
+    'maxseps':0,     # maximum # black column separators
+    'sepwiden':10,   # widen black separators (to account for warping)
+    'maxcolseps':3,  # maximum # whitespace column separators
+    'csminheight':10.0,# minimum column height (units=scale)
+
+    ### The following parameters cannot be overwritten by users
     # output parameters
     'pad':3,         # adding for extracted lines
     'expand':3,      # expand mask for grayscale extraction
     # other parameters
-    'nocheck':True,  # disable error checking on inputs
-    'quiet':False,   # be less verbose
+    'nocheck':True,  # enable error checking on inputs
+    'quiet':False,   # be less verbose, usally use with parallel together
     'debug':False
+    #'parallel':0     # number of parallel processes to use
 }
+
 
 # The global variable
 args = {}
@@ -79,11 +103,11 @@ def segmentation_exec(image, parameters):
         output_dic = process(image)
     except OcropusException as e:
         if e.trace:
-            traceback.logger.exc()
+            traceback.print_exc()
         else:
             logger.info(image+":"+e)
     except Exception as e:
-        traceback.logger.exc()
+        traceback.print_exc()
     
     return output_dic
 
@@ -219,7 +243,7 @@ def compute_gradmaps(binary,scale):
     boxmap = psegutils.compute_boxmap(binary,scale)
     cleaned = boxmap*binary
     DSAVE("cleaned",cleaned)
-    if args['usegause']:
+    if args['usegauss']:
         # this uses Gaussians
         grad = gaussian_filter(1.0*cleaned,(args['vscale']*0.3*scale,
                                             args['hscale']*6*scale),order=(1,0))

@@ -43,13 +43,23 @@ dataDir = settings.MEDIA_ROOT
 # The directory of the default model
 default_model = settings.BASE_DIR + "/models/en-default.pyrnn.gz"
 
-# 'args_default' only contains the parameters that cannot be set by users
-args_default = {
-    'model':default_model, # line recognition model
-    'nocheck':True,        # disable error checking on images
-    'quiet':False          # turn off most output
 
+# The default parameters values
+args_default = {
+    ### The following 6 parameters can be set by user
+    'model':default_model,  # line recognition model
+    'height':-1,        # target line height (overrides recognizer)
+    'pad':16,           # extra blank padding to the left and right of text line
+    'nonormalize':False,# don't normalize the textual output from the recognizer, don't apply standard Unicode normalizations for OCR
+    'llocs':False,      # output LSTM locations for characters
+    'probabilities':False,# output probabilities for each letter
+
+    ### The following parameters cannot be overwritten by users
+    'nocheck':True,     # disable error checking on images
+    'quiet':False      # turn off most output
+    #'parallel':0        # number of parallel processes to use
 }
+
 
 # The global variable
 args = {}
