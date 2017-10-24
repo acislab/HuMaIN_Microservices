@@ -29,8 +29,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.conf import settings
 from django.shortcuts import render
-from .models import Parameters
-from .serializers import ParameterSerializer
 from .segmentation import segmentation_exec
 from .extrafunc import del_service_files
 import sys, os, os.path, zipfile, StringIO
@@ -55,23 +53,22 @@ def segmentationView(request, format=None):
         logger.error("Please upload only one image")
         return Response("ERROR: Please upload an image", status=status.HTTP_400_BAD_REQUEST)
 
-    ### Receive image and parameters with model serializer
-    paras_serializer = ParameterSerializer(data=request.data)
-    if paras_serializer.is_valid():
-        paras_serializer.save()
-    else:
-        logger.error(paras_serializer.errors)
-        return Response(paras_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    ### Receive parameters set by user
+    parameters = request.data.dict()
+    del parameters['image'] # parameter 'image' will be processed later
+    keys = parameters.keys()
+    if 'usegauss' in keys:
+        keys.remove('usegauss') 
+    for key in keys:
+        parameters[key] = float(parameters[key])
     
     image_object = request.FILES['image']
     ### Call segmentation function
     seg_begin = time.time()
     # output_dic: key--single-line image name. value--line image object
-    output_dic = segmentation_exec(image_object, paras_serializer.data)
+    output_dic = segmentation_exec(image_object, parameters)
     seg_end = time.time()
     if not output_dic: # if output_list is empty
-        Parameters.objects.filter(id=paras_serializer.data['id']).delete()
-        del_service_files(dataDir)
         logger.error("sth wrong with segmentation")
         return Response("ERROR: sth wrong with segmentation", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -97,9 +94,6 @@ def segmentationView(request, format=None):
     # And correct content-disposition
     response["Content-Disposition"] = 'attachment; filename=%s' % zip_name
     
-    ### Delete all datas generated during this service
-    # Delete data in database
-    Parameters.objects.filter(id=paras_serializer.data['id']).delete()
 
     send_resp = time.time()
     logger.info("===== Image %s =====" % str(image_object))

@@ -29,10 +29,8 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.shortcuts import render
 from wsgiref.util import FileWrapper
-from .models import Parameters
 from .binarization import binarization_exec
 from .extrafunc import resize_image, del_service_files
-from .serializers import ParameterSerializer
 import sys, os, os.path
 import time
 import logging
@@ -58,30 +56,25 @@ def binarizationView(request, format=None):
         logger.error("Please upload only one image")
         return Response("ERROR: Please upload only one image", status=status.HTTP_400_BAD_REQUEST)
 
-    ### Receive parameters with model serializer
-    paras_serializer = ParameterSerializer(data=request.data)
-    if paras_serializer.is_valid():
-        paras_serializer.save()
-    else:
-        logger.error(paras_serializer.errors)
-        return Response(paras_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    image_object = request.FILES['image']
+    ### Receive parameters set by user
+    parameters = request.data.dict()
+    del parameters['image'] # parameter 'image' will be processed later
+    for key in parameters:
+        parameters[key] = float(parameters[key])
     
-    ### Resize the image if its size smaller than 600*600
+    ### Receive and resize the image if its size smaller than 600*600
+    image_object = request.FILES['image']
     try:
         image_object = resize_image(image_object)
     except:
-        Parameters.objects.filter(id=paras_serializer.data['id']).delete()
         return Response("ERROR: Re-size image error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
  
     ### Call OCR binarization function
     bin_begin = time.time()
-    output_file = binarization_exec(image_object, paras_serializer.data)
+    output_file = binarization_exec(image_object, parameters)
     bin_end = time.time()
     if output_file is None:
-        Parameters.objects.filter(id=paras_serializer.data['id']).delete()
         logger.error("sth wrong with binarization")
         return Response("ERROR: sth wrong with binarization", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -89,8 +82,6 @@ def binarizationView(request, format=None):
     response = HttpResponse(content_type="image/png")
     output_file.save(response, "PNG")
 
-    ### Delete parameters object in DB
-    Parameters.objects.filter(id=paras_serializer.data['id']).delete()
 
     send_resp = time.time()
     logger.info("===== Image %s =====" % str(image_object))

@@ -31,8 +31,6 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.shortcuts import render
 from wsgiref.util import FileWrapper
-from .models import Parameters
-from .serializers import ParameterSerializer
 from .recognition import recognition_exec
 from .extrafunc import del_service_files
 import sys, os, os.path, zipfile, StringIO, glob
@@ -55,31 +53,29 @@ def recognitionView(request, format=None):
     if request.data.get('image') is None:
         logger.error("Please upload only one image")
         return Response("ERROR: Please upload an image", status=status.HTTP_400_BAD_REQUEST)
-
-    ### Receive image and parameters with model serializer
-    paras_serializer = ParameterSerializer(data=request.data)
-    if paras_serializer.is_valid():
-        paras_serializer.save()
-    else:
-        logger.error(paras_serializer.errors)
-        return Response(paras_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 	
-    image_object = request.FILES['image']
+    ### Receive parameters set by user
+    parameters = request.data.dict()
+    del parameters['image'] # parameter 'image' will be processed later
+    keys = parameters.keys()
+    for key in parameters.keys():
+        if key == "height" or key == "pad":
+            parameters[key] = int(parameters[key])
 
-    ### Seperately receive model set by user
+    ### Seperately receive and save model set by user
     modelpath = None
     if request.data.get('model') is not None: 
         model = request.data.get('model')
         modelpath = dataDir+"/"+str(model)
         default_storage.save(modelpath, model)
 
-    ### Call OCR recognition function
+    ### Call OCR recognition function to recognize image in memory
+    image_object = request.FILES['image']
     recog_begin = time.time()
     # output dic. key: file type (e.g., content-.txt, locaton-.llocs, and probability-.prob). value: contents in memory
-    recog_dic = recognition_exec(image_object, paras_serializer.data, modelpath)
+    recog_dic = recognition_exec(image_object, parameters, modelpath)
     recog_end = time.time()
     if not recog_dic: # if output is emplty
-        Parameters.objects.filter(id=paras_serializer.data['id']).delete()
         if modelpath is not None:
             del_service_files(modelpath)
         logger.error("sth wrong with recognition")
@@ -104,8 +100,6 @@ def recognitionView(request, format=None):
     # And correct content-disposition
     response["Content-Disposition"] = 'attachment; filename=%s' % zip_name
 
-    # Delete all files related to this service
-    Parameters.objects.filter(id=paras_serializer.data['id']).delete()
     # Delete recognized model if it was uploaded by user
     if modelpath is not None:
             del_service_files(modelpath)
