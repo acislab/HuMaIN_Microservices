@@ -1,13 +1,5 @@
 django
 djangorestframework
-django-rest-swagger
-django-filter
-
-## dev requirements
-sphinx
-
-## Test and quality analysis
-django-jenkins
 
 ## Image resize
 python-resize-image
@@ -18,3 +10,6 @@ scipy>=0.15.1
 matplotlib>=1.4.3
 Pillow>=2.7.0
 lxml>=3.5.0
+
+## prodoction web server Gunicorn
+gunicorn==19.7.0
