@@ -160,7 +160,7 @@ def read_image_gray(fname,pageno=0):
     the range 0...1 (unsigned) or -1...1 (signed)."""
     if type(fname)==tuple: fname,pageno = fname
     assert pageno==0
-    if type(fname) == PIL.Image.Image:
+    if issubclass(type(fname), PIL.Image.Image):
         pil = fname
     else:
         pil = PIL.Image.open(fname)
@@ -194,13 +194,16 @@ def write_image_gray(fname,image,normalize=0,verbose=0):
     im = array2pil(image)
     im.save(fname)
 
-@checks(str,_=ABINARY2)
+@checks({str, object},_=ABINARY2)
 def read_image_binary(fname,dtype='i',pageno=0):
     """Read an image from disk and return it as a binary image
     of the given dtype."""
     if type(fname)==tuple: fname,pageno = fname
     assert pageno==0
-    pil = PIL.Image.open(fname)
+    if issubclass(type(fname), PIL.Image.Image):
+        pil = fname
+    else:
+        pil = PIL.Image.open(fname)
     a = pil2array(pil)
     if a.ndim==3: a = amax(a,axis=2)
     return array(a>0.5*(amin(a)+amax(a)),dtype)
