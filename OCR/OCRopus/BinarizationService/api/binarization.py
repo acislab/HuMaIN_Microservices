@@ -124,7 +124,7 @@ def array2pil(a):
 
 def process(imagepath):
     logger.info("# %s" % (imagepath))
-    raw = ocrolib.read_image_gray(imagepath) 
+    raw = ocrolib.read_image_gray(imagepath)
 
     # perform image normalization
     image = raw-amin(raw)

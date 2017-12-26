@@ -53,8 +53,6 @@ def resize_image(old_image):
         new_size = [w, h]
         new_image = resizeimage.resize_contain(img, new_size)
         return new_image
-        #new_image.save(image, new_image.format) # override the original image
-        #fd_img.close()
     else:
         return old_image
         pass
