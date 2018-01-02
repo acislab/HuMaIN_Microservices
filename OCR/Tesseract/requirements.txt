@@ -4,3 +4,4 @@ djangorestframework
 # packages for tesseract wrapper: pyocr
 Pillow
 pyocr
+tesseract # Note: For CentOS/RedHat Linux distribution, using script 'install-tesseract-redhat-centos' to install tesseract
