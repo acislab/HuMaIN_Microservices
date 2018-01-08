@@ -29,7 +29,8 @@ start_time = time.time()
 
 ### The server IP and PORT in lab ACIS deploying HuMaIN OCRopus microservices (Only accessable for ACIS members)
 ### Please Replace with your server IP when testing
-IP = "10.5.146.92"
+#IP = "10.5.146.92"
+IP = "localhost"
 PORT = "8002"
 
 ### Transfer string to boolean
@@ -48,7 +49,9 @@ parser = argparse.ArgumentParser("Call OCRopy Segmentation Service")
 parser.add_argument('image', help="The path of a image file, or a folder containing all pre-process images.")
 
 # output parameters
-parser.add_argument('-o','--output', default=None, help="output directory, without the last slash")
+parser.add_argument('-o', '--output', default=None, help="output directory, without the last slash")
+parser.add_argument('-c', '--coordinate', default="False", type=str2bool, default=argparse.SUPPRESS, help="True: return segemented images' coordinates list. False: return segmented images")
+
 
 # limits
 group_limits = parser.add_argument_group('limits')
@@ -73,6 +76,11 @@ group_column.add_argument('--maxseps',type=int,default=argparse.SUPPRESS, help='
 group_column.add_argument('--sepwiden',type=int,default=argparse.SUPPRESS, help='widen black separators (to account for warping)')
 group_column.add_argument('--maxcolseps',type=int,default=argparse.SUPPRESS, help='maximum # whitespace column separators')
 group_column.add_argument('--csminheight',type=float,default=argparse.SUPPRESS, help='minimum column height (units=scale)')
+
+# output parameters
+group_column = parser.add_argument_group('output parameters')
+group_column.add_argument('--pad',type=int,default=argparse.SUPPRESS, help='adding for extracted lines')
+group_column.add_argument('--expand',type=int,default=argparse.SUPPRESS, help='expand mask for grayscale extraction')
 
 
 args = parser.parse_args()
