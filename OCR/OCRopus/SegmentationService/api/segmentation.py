@@ -72,10 +72,14 @@ args_default = {
     'maxcolseps':3,  # maximum # whitespace column separators
     'csminheight':10.0,# minimum column height (units=scale)
 
-    ### The following parameters cannot be overwritten by users
+    # return type
+    'coordinate':False, # True: return segemented images' coordinates list. False: return segmented images
+
     # output parameters
     'pad':3,         # adding for extracted lines
     'expand':3,      # expand mask for grayscale extraction
+
+    ### The following parameters cannot be overwritten by users
     # other parameters
     'nocheck':True,  # enable error checking on inputs
     'quiet':False,   # be less verbose, usally use with parallel together
@@ -98,9 +102,9 @@ def segmentation_exec(image, parameters):
     args.update(parameters)
 
     # Segment the image
-    output_dic = {} # key: single-line image name. value: single-line image object
+    output = None # key: single-line image name. value: single-line image object
     try:
-        output_dic = process(image)
+        output = process(image)
     except OcropusException as e:
         if e.trace:
             traceback.print_exc()
@@ -109,7 +113,7 @@ def segmentation_exec(image, parameters):
     except Exception as e:
         traceback.print_exc()
     
-    return output_dic
+    return output
 
 
 def norm_max(v):
@@ -394,8 +398,15 @@ def process(image):
     lines = [lines[i] for i in lsort]
     cleaned = ocrolib.remove_noise(binary,args['noise'])
 
+    ### Return coordinates list
+    if args['coordinate']:
+        coord_list = []
+        for line in lines:
+            y0, x0, y1, x1 = (int(x) for x in [line.bounds[0].start-args['pad'], line.bounds[1].start-args['pad'], line.bounds[0].stop+args['pad'], line.bounds[1].stop]+args['pad'])
+            coord_list.append((x0, y0, x1, y1))
+        return coord_list
 
-    ### Return image objects dictionary (in memory)
+    ### Or return image objects dictionary (in memory)
     output_dic = {}  # key: single-line image name. value: single-line image object
     for index, line in enumerate(lines):
         binline = psegutils.extract_masked(1-cleaned,line,pad=args['pad'],expand=args['expand'])

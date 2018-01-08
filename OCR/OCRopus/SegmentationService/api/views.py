@@ -26,7 +26,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.shortcuts import render
 from .segmentation import segmentation_exec
@@ -58,21 +58,26 @@ def segmentationView(request, format=None):
     del parameters['image'] # parameter 'image' will be processed later
     keys = parameters.keys()
     if 'usegauss' in keys:
-        keys.remove('usegauss') 
+        keys.remove('usegauss')
+    if 'coordinate' in keys:
+        keys.remove('coordinate') 
     for key in keys:
         parameters[key] = float(parameters[key])
     
     image_object = request.FILES['image']
     ### Call segmentation function
     seg_begin = time.time()
-    # output_dic: key--single-line image name. value--line image object
-    output_dic = segmentation_exec(image_object, parameters)
+    seg_result = segmentation_exec(image_object, parameters)
     seg_end = time.time()
-    if not output_dic: # if output_list is empty
+    if not seg_result: # if output_list is empty
         logger.error("sth wrong with segmentation")
         return Response("ERROR: sth wrong with segmentation", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    ### return the multiple files in zip type
+    ### Return coordinates list
+    if ('coordinate' in parameters) and (parameters['coordinate']):
+        return JsonResponse(seg_result, safe=False)
+
+    ### Else return the segmented images in zip type
     # Folder name in ZIP archive which contains the above files
     imagename_base, ext = os.path.splitext(str(image_object))
     zip_dir = imagename_base+"_seg"
@@ -81,10 +86,10 @@ def segmentationView(request, format=None):
     zf = zipfile.ZipFile(strio, "w") # The zip compressor
 
     # Zip multiple image objects from memory
-    for key in output_dic:
+    for key in seg_result:
         # Save single-line image object in memory as png format
         line_image_io = StringIO.StringIO()
-        output_dic[key].save(line_image_io, 'png')
+        seg_result[key].save(line_image_io, 'png')
         zip_path = os.path.join(zip_dir, key)
         zf.writestr(zip_path, line_image_io.getvalue())
     zf.close()
