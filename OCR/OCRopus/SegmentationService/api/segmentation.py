@@ -402,8 +402,9 @@ def process(image):
     if args['coordinate']:
         coord_list = []
         for line in lines:
-            y0, x0, y1, x1 = (int(x) for x in [line.bounds[0].start-args['pad'], line.bounds[1].start-args['pad'], line.bounds[0].stop+args['pad'], line.bounds[1].stop]+args['pad'])
-            coord_list.append((x0, y0, x1, y1))
+            y0, x0, y1, x1 = [int(x) for x in [line.bounds[0].start, line.bounds[1].start, \
+                                                line.bounds[0].stop, line.bounds[1].stop]]
+            coord_list.append((x0-args['pad'], y0-args['pad'], x1+args['pad'], y1+args['pad']))
         return coord_list
 
     ### Or return image objects dictionary (in memory)
