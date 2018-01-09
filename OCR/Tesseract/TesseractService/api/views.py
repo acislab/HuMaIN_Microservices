@@ -10,10 +10,6 @@ from tesseract import tesseract_exec
 import os, StringIO
 
 
-# Get the directory which stores all input and output files
-projectDir = settings.BASE_DIR
-dataDir = settings.MEDIA_ROOT
-
 def index(request):
 	return render(request, 'index.html')
 
