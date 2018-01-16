@@ -1,13 +1,5 @@
-django
+django==1.11
 djangorestframework
-django-rest-swagger
-django-filter
-
-## dev requirements
-sphinx
-
-## Test and quality analysis
-django-jenkins
 
 ## Image resize
 python-resize-image
