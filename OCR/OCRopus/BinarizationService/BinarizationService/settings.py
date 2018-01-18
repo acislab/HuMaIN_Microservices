@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '!9t335z$3zj3q%9$+*_v2@hzl1cbytsu7wr8aq#z(0-u4fyxfa'
+SECRET_KEY = os.environ["SECRET_KEY_BIN"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -164,6 +164,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Service base urls
 BINARIZATION_SERIVICE_BASE_URL = "http://binarizationservice.acis.ufl.edu"
@@ -173,3 +174,9 @@ BINARIZATION_SERIVICE_BASE_URL = "http://binarizationservice.acis.ufl.edu"
 MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a trailing slash.
 MEDIA_URL = '/data/'
+
+# variables set in production environment
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECUR = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
