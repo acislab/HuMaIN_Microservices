@@ -24,7 +24,7 @@ from multiprocessing import Pool
 from django.conf import settings
 from itertools import product
 from contextlib import contextmanager
-import PIL.Image, cv2, zipfile, StringIO
+import cv2, zipfile, StringIO
 import io, os, subprocess, glob, shutil
 
 ### OCRopus services information
