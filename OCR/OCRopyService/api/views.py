@@ -26,6 +26,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
+from rest_framework import status
 from django.http import HttpResponse, FileResponse
 from .ocr import ocr_exec
 import os
@@ -60,4 +61,3 @@ def ocrView(request, format=None):
     response['Content-Disposition'] = 'attachment; filename=%s' % extract_name
     
     return response
-    #return FileResponse(open(extract_file, 'rb'))
