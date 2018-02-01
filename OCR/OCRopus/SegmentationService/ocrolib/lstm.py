@@ -35,7 +35,7 @@ from pylab import (clf, cm, figure, ginput, imshow, newaxis, rand, subplot,
 from collections import defaultdict
 from ocrolib.exceptions import RecognitionError
 from ocrolib.edist import levenshtein
-import nutils
+import utils
 import unicodedata
 from scipy.ndimage import measurements,filters
 
@@ -89,17 +89,6 @@ def sumouter(us,vs,lo=-1.0,hi=1.0,out=None):
     result = out or zeros((len(us[0]),len(vs[0])))
     for u,v in zip(us,vs):
         result += outer(clip(u,lo,hi),v)
-    return result
-
-def sumprod(us,vs,lo=-1.0,hi=1.0,out=None):
-    """Sum the element-wise products of the `us` and `vs`.
-    Values are clipped into the range `[lo,hi]`.
-    This is mainly used for computing weight updates
-    in logistic regression layers."""
-    assert len(us[0])==len(vs[0])
-    result = out or zeros(len(us[0]))
-    for u,v in zip(us,vs):
-        result += clip(u,lo,hi)*v
     return result
 
 class Network:
@@ -380,7 +369,8 @@ class MLP(Network):
 
 def ffunc(x):
     "Nonlinearity used for gates."
-    return 1.0/(1.0+exp(-x))
+    # cliping to avoid overflows
+    return 1.0/(1.0+exp(clip(-x,-20,20)))
 def fprime(x,y=None):
     "Derivative of nonlinearity used for gates."
     if y is None: y = sigmoid(x)
@@ -470,13 +460,13 @@ def backward_py(n,N,ni,ns,na,deltas,
             sourceerr[t] += dot(gferr[t],WGF)
         sourceerr[t] += dot(goerr[t],WGO)
         sourceerr[t] += dot(cierr[t],WCI)
-    DWIP = nutils.sumprod(gierr[1:n],state[:n-1],out=DWIP)
-    DWFP = nutils.sumprod(gferr[1:n],state[:n-1],out=DWFP)
-    DWOP = nutils.sumprod(goerr[:n],state[:n],out=DWOP)
-    DWGI = nutils.sumouter(gierr[:n],source[:n],out=DWGI)
-    DWGF = nutils.sumouter(gferr[1:n],source[1:n],out=DWGF)
-    DWGO = nutils.sumouter(goerr[:n],source[:n],out=DWGO)
-    DWCI = nutils.sumouter(cierr[:n],source[:n],out=DWCI)
+    DWIP = utils.sumprod(gierr[1:n],state[:n-1],out=DWIP)
+    DWFP = utils.sumprod(gferr[1:n],state[:n-1],out=DWFP)
+    DWOP = utils.sumprod(goerr[:n],state[:n],out=DWOP)
+    DWGI = utils.sumouter(gierr[:n],source[:n],out=DWGI)
+    DWGF = utils.sumouter(gferr[1:n],source[1:n],out=DWGF)
+    DWGO = utils.sumouter(goerr[:n],source[:n],out=DWGO)
+    DWCI = utils.sumouter(cierr[:n],source[:n],out=DWCI)
 
 class LSTM(Network):
     """A standard LSTM network. This is a direct implementation of all the forward
