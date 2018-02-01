@@ -30,8 +30,8 @@ import io, os, subprocess, glob, shutil
 ### OCRopus services information
 IP = "10.5.146.92"
 BIN_PORT = "8001"
-SEG_PORT = "8002"
-RECOG_PORT = "8003"
+SEG_PORT = "8003"
+RECOG_PORT = "8004"
 URL_BIN = "http://" + IP + ":" + BIN_PORT + "/binarizationapi"
 URL_SEG = "http://" + IP + ":" + SEG_PORT + "/segmentationapi"
 URL_RECOG = "http://" + IP + ":" + RECOG_PORT + "/recognitionapi"
