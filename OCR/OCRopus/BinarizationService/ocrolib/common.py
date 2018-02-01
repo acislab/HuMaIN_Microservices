@@ -35,7 +35,6 @@ import lstm
 import morph
 import multiprocessing
 import sl
-import StringIO
 
 pickle_mode = 2
 
@@ -153,19 +152,15 @@ def isintarray(a):
 def isintegerarray(a):
     return a.dtype in [dtype('int32'),dtype('int64'),dtype('uint32'),dtype('uint64')]
 
-@checks({str,object},pageno=int,_=GRAYSCALE) #(Annoted by Jingchao Luan)
+@checks(str,pageno=int,_=GRAYSCALE)
 def read_image_gray(fname,pageno=0):
     """Read an image and returns it as a floating point array.
     The optional page number allows images from files containing multiple
     images to be addressed.  Byte and short arrays are rescaled to
     the range 0...1 (unsigned) or -1...1 (signed)."""
-
     if type(fname)==tuple: fname,pageno = fname
     assert pageno==0
-    if issubclass(type(fname), PIL.Image.Image):
-        pil = fname
-    else:
-        pil = PIL.Image.open(fname)
+    pil = PIL.Image.open(fname)
     a = pil2array(pil)
     if a.dtype==dtype('uint8'):
         a = a/255.0
@@ -196,16 +191,13 @@ def write_image_gray(fname,image,normalize=0,verbose=0):
     im = array2pil(image)
     im.save(fname)
 
-@checks({str,object},_=ABINARY2)
+@checks(str,_=ABINARY2)
 def read_image_binary(fname,dtype='i',pageno=0):
     """Read an image from disk and return it as a binary image
     of the given dtype."""
     if type(fname)==tuple: fname,pageno = fname
     assert pageno==0
-    if issubclass(type(fname), PIL.Image.Image):
-        pil = fname
-    else:
-        pil = PIL.Image.open(fname)
+    pil = PIL.Image.open(fname)
     a = pil2array(pil)
     if a.ndim==3: a = amax(a,axis=2)
     return array(a>0.5*(amin(a)+amax(a)),dtype)
@@ -287,7 +279,6 @@ def read_page_segmentation(fname):
     segmentation = make_seg_black(segmentation)
     return segmentation
 
-@checks(str,PAGESEG)
 def write_page_segmentation(fname,image):
     """Writes a page segmentation, that is an RGB image whose values
     encode the segmentation of a page."""
@@ -630,8 +621,10 @@ def ocropus_find_file(fname, gz=True):
 
     possible_prefixes.append("/usr/local/share/ocropus")
 
-    possible_prefixes.append(os.path.join(
-        sysconfig.get_config_var("datarootdir"), "ocropus"))
+    # datarootdir is None in windows so don't add it to search list
+    if sysconfig.get_config_var("datarootdir") is not None:
+        possible_prefixes.append(os.path.join(
+            sysconfig.get_config_var("datarootdir"), "ocropus"))
 
 
     # Unique entries with preserved order in possible_prefixes
@@ -773,37 +766,6 @@ def ustrg2unicode(u,lig=ligatures.lig):
             else:
                 result += "<%d>"%value
     return result
-
-### code for instantiation native components
-
-def pyconstruct(s):
-    """Constructs a Python object from a constructor, an expression
-    of the form x.y.z.name(args).  This ensures that x.y.z is imported.
-    In the future, more forms of syntax may be accepted."""
-    env = {}
-    if "(" not in s:
-        s += "()"
-    path = s[:s.find("(")]
-    if "." in path:
-        module = path[:path.rfind(".")]
-        print("import", module)
-        exec "import "+module in env
-    return eval(s,env)
-
-def mkpython(name):
-    """Tries to instantiate a Python class.  Gives an error if it looks
-    like a Python class but can't be instantiated.  Returns None if it
-    doesn't look like a Python class."""
-    if name is None or len(name)==0:
-        return None
-    elif type(name) is not str:
-        return name()
-    elif name[0]=="=":
-        return pyconstruct(name[1:])
-    elif "(" in name or "." in name:
-        return pyconstruct(name)
-    else:
-        return None
 
 ################################################################
 ### loading and saving components
