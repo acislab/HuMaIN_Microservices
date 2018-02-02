@@ -20,7 +20,7 @@
 ##########################################################################################
 
 import requests
-from multiprocessing import Pool
+import multiprocessing
 from django.conf import settings
 from itertools import product
 from contextlib import contextmanager
@@ -36,10 +36,10 @@ URL_BIN = "http://" + IP + ":" + BIN_PORT + "/binarizationapi"
 URL_SEG = "http://" + IP + ":" + SEG_PORT + "/segmentationapi"
 URL_RECOG = "http://" + IP + ":" + RECOG_PORT + "/recognitionapi"
 
-### Global variables
-
 # Record the # of images, creating intermediate folder with CT, in case of processing images with same name
 CT = 0 
+# Default parallel number to call recognition service
+RECOG_PARALLEL = 3
 
 def ocr_exec(image, parameters):
 	dataDir = settings.MEDIA_ROOT
@@ -80,6 +80,7 @@ def ocr_exec(image, parameters):
 				fd.write(chunk)
 	else:
 		print("Image %s Binarization failed!" % image)
+		shutil.rmtree(path_data)
 		return None
 	
 	#####################################
@@ -96,6 +97,7 @@ def ocr_exec(image, parameters):
 		z.extractall(path_seg)
 	else:
 		print("Image %s Segmentation error!" % bin_img_name)
+		shutil.rmtree(path_data)
 		return None
 
 	#####################################
@@ -105,28 +107,18 @@ def ocr_exec(image, parameters):
 	path_recog = path_data + "/" + "recog"
 	if not os.path.isdir(path_recog):
 		subprocess.call(["mkdir -p " + path_recog], shell=True)
-	# Package image and model specified by user
-	upload_files = []
-	if 'model' in paras_recog:
-		multiple_files.append(('model', (paras_recog['model'], open(paras_recog['model'], 'rb'))))
-		del paras_recog['model']
 	# The internal folder that stored the segmented images
 	folder_seg_images = os.listdir(path_seg)[0]
 	path_seg_images = path_seg + "/" + folder_seg_images
 	# Call recognition service for each segmented images
+	jobs = []
 	for img_seg in os.listdir(path_seg_images):
 		img_seg_base, img_seg_ext = str(img_seg).split(".")
 		img_seg_path = os.path.join(path_seg_images, img_seg)
-		upload_files.append(('image', (img_seg_path, open(img_seg_path, 'rb'))))
-		resp_recog = requests.get(URL_RECOG, files=upload_files, data=paras_recog)
-		# Unpress the zip file responsed from recognition service
-		if resp_recog.status_code == 200:
-			# For python 3+, replace with io.BytesIO(resp.content)
-			z = zipfile.ZipFile(StringIO.StringIO(resp_recog.content))
-			z.extractall(path_recog)
-		else:
-			print("Image %s Recognition error!" % str(img_seg))
-        	continue
+		jobs.append((img_seg_path, paras_recog, path_recog))
+	# Call recognition service with multiple processes, # processes = # CPU by default
+	pool = multiprocessing.Pool(processes=recog_parallel)
+	pool.map(call_recog, jobs)
 	
     ##########################################################
 	##### Concatenate all reconition results in sequence #####
@@ -135,16 +127,9 @@ def ocr_exec(image, parameters):
 	# sort by alphabetical order followed by length of string
 	recog_list.sort()
 	recog_list.sort(key=len)
-	# combine all of the recognized results
-	### Write all recognizaed files into one file and return this file
-	#extract_file = path_data + "/" + img_base + ".txt"
-	#with open(extract_file, "wb") as outfile:
-	#    for f in recog_list:
-	#        with open(f, "rb") as infile:
-	#            outfile.write(infile.read())
-	#            outfile.write("\n")
-	### Write all recognized results into one String object, and return this object
-	### from memory to user directly. Reducing 2 times accessing disk
+	# Combine all of the recognized results.
+	# Write all recognized results into one String object, and return this object
+	# from memory to user directly. Reducing 2 times accessing disk
 	extract_result = ""
 	for f in recog_list:
 		with open(f, "rb") as infile:
@@ -156,6 +141,22 @@ def ocr_exec(image, parameters):
 	shutil.rmtree(path_data)
 
 	return extract_result
+
+def call_recog(image, parameters, dstDir):
+	# Package image and model specified by user
+	upload_files = []
+	if 'model' in parameters:
+		multiple_files.append(('model', (parameters['model'], open(parameters['model'], 'rb'))))
+		del parameters['model']	
+	upload_files.append(('image', (image, open(image, 'rb'))))
+	resp_recog = requests.get(URL_RECOG, files=upload_files, data=parameters)
+	# Unpress the zip file responsed from recognition service
+	if resp_recog.status_code == 200:
+		# For python 3+, replace with io.BytesIO(resp.content)
+		z = zipfile.ZipFile(StringIO.StringIO(resp_recog.content))
+		z.extractall(dstDir)
+	else:
+		print("Image %s Recognition error!" % str(image))
 
 
 def ocr_exec_mulP(image, parameters):
