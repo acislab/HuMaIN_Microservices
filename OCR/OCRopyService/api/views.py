@@ -69,5 +69,5 @@ def ocrView(request, format=None):
         fd.write("Ocropy time %.3f seconds." %(end_ocropy - begin_ocropy))
         fd.write("After ocropy %.3f seconds." %(end_time - end_ocropy))
         fd.close()
-    
+
     return response

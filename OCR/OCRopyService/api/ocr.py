@@ -148,15 +148,15 @@ def ocr_exec(image, parameters):
 
 	end_ocropy = time.time()
 
-    with open("ocropy_time_inner.txt", "wb") as fd:
-        fd.write("Before Bin. %.3f seconds." %(begin_bin - start_time))
-        fd.write("Bin. %.3f seconds." %(end_bin - begin_bin))
-        fd.write("Store bin. result %.3f seconds." %(begin_seg - end_bin))
-        fd.write("Seg. %.3f seconds." %(end_seg - begin_seg))
-        fd.write("Unzip seg. result %.3f seconds." %(begin_recog - end_seg))
-        fd.write("Recog. %.3f seconds." %(end_recog - begin_recog))
-        fd.write("Combine & delete %.3f seconds." %(end_ocropy - end_recog))
-        fd.close()
+	with open("ocropy_time_inner.txt", "wb") as fd:
+		fd.write("Before Bin. %.3f seconds." %(begin_bin - start_time))
+		fd.write("Bin. %.3f seconds." %(end_bin - begin_bin))
+		fd.write("Store bin. result %.3f seconds." %(begin_seg - end_bin))
+		fd.write("Seg. %.3f seconds." %(end_seg - begin_seg))
+		fd.write("Unzip seg. result %.3f seconds." %(begin_recog - end_seg))
+		fd.write("Recog. %.3f seconds." %(end_recog - begin_recog))
+		fd.write("Combine & delete %.3f seconds." %(end_ocropy - end_recog))
+		fd.close()
 
 	return extract_result
 
