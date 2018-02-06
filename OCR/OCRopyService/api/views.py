@@ -64,10 +64,10 @@ def ocrView(request, format=None):
     response['Content-Disposition'] = 'attachment; filename=%s' % extract_name
     
     end_time = time.time()
-    with open("ocropy_time_out.txt", "wb") as fd:
-        fd.write("Before ocropy %.3f seconds." %(begin_ocropy - start_time))
-        fd.write("Ocropy time %.3f seconds." %(end_ocropy - begin_ocropy))
-        fd.write("After ocropy %.3f seconds." %(end_time - end_ocropy))
-        fd.close()
+    #with open("ocropy_time_out.txt", "wb") as fd:
+    print("Before ocropy %.3f seconds." %(begin_ocropy - start_time))
+    print("Ocropy time %.3f seconds." %(end_ocropy - begin_ocropy))
+    print("After ocropy %.3f seconds." %(end_time - end_ocropy))
+        #fd.close()
 
     return response
