@@ -20,7 +20,7 @@
 ##########################################################################################
 
 import requests
-import multiprocessing
+import multiprocessing as mp
 from django.conf import settings
 from itertools import product
 from contextlib import contextmanager
@@ -38,8 +38,6 @@ URL_RECOG = "http://" + IP + ":" + RECOG_PORT + "/recognitionapi"
 
 # Record the # of images, creating intermediate folder with CT, in case of processing images with same name
 CT = 0 
-# Default parallel number to call recognition service
-RECOG_PARALLEL = 3
 
 def ocr_exec(image, parameters):
 	dataDir = settings.MEDIA_ROOT
@@ -117,10 +115,10 @@ def ocr_exec(image, parameters):
 		img_seg_path = os.path.join(path_seg_images, img_seg)
 		jobs.append((img_seg_path, paras_recog, path_recog))
 	# Call recognition service with multiple processes, # processes = # CPU by default
-	pool = multiprocessing.Pool(processes=recog_parallel)
-	pool.map(call_recog, jobs)
-	
-    ##########################################################
+	pool = mp.Pool(maxtasksperchild=3)
+	results = pool.map(call_recog, jobs)
+	print(results)
+	##########################################################
 	##### Concatenate all reconition results in sequence #####
 	##########################################################
 	recog_list = glob.glob(path_recog+"/*/*.txt")
@@ -142,7 +140,9 @@ def ocr_exec(image, parameters):
 
 	return extract_result
 
-def call_recog(image, parameters, dstDir):
+
+def call_recog(job):
+	image, parameters, dstDir = job
 	# Package image and model specified by user
 	upload_files = []
 	if 'model' in parameters:
@@ -157,7 +157,7 @@ def call_recog(image, parameters, dstDir):
 		z.extractall(dstDir)
 	else:
 		print("Image %s Recognition error!" % str(image))
-
+	return "success"
 
 def ocr_exec_mulP(image, parameters):
 	### Default 3 threshold values
