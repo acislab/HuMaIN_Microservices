@@ -24,7 +24,7 @@ import time, argparse, os
 
 start_time = time.time()
 
-IP = "localhost"
+IP = "10.5.146.92"
 PORT = "8000"
 
 LICHENS = "/home/jingchao/HuMaIN/label-data-master/lichens/gold/inputs" # 200 images
@@ -80,6 +80,11 @@ if __name__ == '__main__':
 		except:
 			pass
 	ent_end = time.time()
+
+	with open("400iDigBio_OCRopyS_time.txt", 'wb') as fd:
+		fd.write("\n*** 200 lichens images' time cost: %.2f seconds ***\n" % (lichens_end - start_time))
+		fd.write("\n*** 100 herb images' time cost: %.2f seconds ***\n" % (herb_end - lichens_end))
+		fd.write("\n*** 100 ent images' time cost: %.2f seconds ***\n" % (ent_end - herb_end))
 
 	print("\n*** 200 lichens images' time cost: %.2f seconds ***\n" % (lichens_end - start_time))
 	print("\n*** 100 herb images' time cost: %.2f seconds ***\n" % (herb_end - lichens_end))
