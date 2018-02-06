@@ -30,6 +30,7 @@ from rest_framework import status
 from django.http import HttpResponse, FileResponse
 from .ocr import ocr_exec
 import os
+import time
 
 def index(request):
     return render(request, 'index.html')
@@ -37,6 +38,7 @@ def index(request):
 @csrf_exempt
 @api_view(['GET', 'POST'])
 def ocrView(request, format=None):
+    start_time = time.time()
     if request.data.get('image') is None:
         return Response("ERROR: Please upload only one image", status=status.HTTP_400_BAD_REQUEST)
 
@@ -48,8 +50,9 @@ def ocrView(request, format=None):
     
     image_object = request.FILES['image']
 
-
+    begin_ocropy = time.time()
     extract_result = ocr_exec(image_object, parameters)
+    end_ocropy = time.time()
     if extract_result is None:
         return Response("ERROR: sth wrong with OCRopus service", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -59,5 +62,12 @@ def ocrView(request, format=None):
     extract_name = img_base + ".txt"
     response = HttpResponse(extract_result, content_type="text/plain")
     response['Content-Disposition'] = 'attachment; filename=%s' % extract_name
+    
+    end_time = time.time()
+    with open("ocropy_time_out.txt", "wb") as fd:
+        fd.write("Before ocropy %.3f seconds." %(begin_ocropy - start_time))
+        fd.write("Ocropy time %.3f seconds." %(end_ocropy - begin_ocropy))
+        fd.write("After ocropy %.3f seconds." %(end_time - end_ocropy))
+        fd.close()
     
     return response

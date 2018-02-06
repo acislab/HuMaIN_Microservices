@@ -26,6 +26,7 @@ from itertools import product
 from contextlib import contextmanager
 import cv2, zipfile, StringIO
 import io, os, subprocess, glob, shutil
+import time
 
 ### OCRopus services information
 IP = "10.5.146.92"
@@ -40,6 +41,7 @@ URL_RECOG = "http://" + IP + ":" + RECOG_PORT + "/recognitionapi"
 CT = 0 
 
 def ocr_exec(image, parameters):
+	start_time = time.time()
 	dataDir = settings.MEDIA_ROOT
 	global CT
 
@@ -68,7 +70,9 @@ def ocr_exec(image, parameters):
 	#####################################
 	##### Call binarization service #####
 	#####################################
+	begin_bin = time.time()
 	resp_bin = requests.get(URL_BIN, files={'image': image}, data=paras_bin)
+	end_bin = time.time()
 	img_bin_name = img_base + "_bin.png"
 	img_bin_path = os.path.join(path_data, img_bin_name)
 	# Save the responsed binarized image
@@ -84,7 +88,9 @@ def ocr_exec(image, parameters):
 	#####################################
 	##### Call segmentation service #####
 	#####################################
+	begin_seg = time.time()
 	resp_seg = requests.get(URL_SEG, files={'image': open(img_bin_path, 'rb')}, data=paras_seg)
+	end_seg = time.time()
 	path_seg = path_data + "/" + "seg" # Unzip segmented images floder under this folder
 	if not os.path.isdir(path_seg):
 		subprocess.call(["mkdir -p " + path_seg], shell=True)
@@ -115,9 +121,11 @@ def ocr_exec(image, parameters):
 		img_seg_path = os.path.join(path_seg_images, img_seg)
 		jobs.append((img_seg_path, paras_recog, path_recog))
 	# Call recognition service with multiple processes, # processes = # CPU by default
+	begin_recog = time.time()
 	pool = mp.Pool(maxtasksperchild=3)
-	results = pool.map(call_recog, jobs)
-	print(results)
+	pool.map(call_recog, jobs)
+	end_recog = time.time()
+	
 	##########################################################
 	##### Concatenate all reconition results in sequence #####
 	##########################################################
@@ -137,6 +145,18 @@ def ocr_exec(image, parameters):
 
 	##### Delete the intermediate data #####
 	shutil.rmtree(path_data)
+
+	end_ocropy = time.time()
+
+    with open("ocropy_time_inner.txt", "wb") as fd:
+        fd.write("Before Bin. %.3f seconds." %(begin_bin - start_time))
+        fd.write("Bin. %.3f seconds." %(end_bin - begin_bin))
+        fd.write("Store bin. result %.3f seconds." %(begin_seg - end_bin))
+        fd.write("Seg. %.3f seconds." %(end_seg - begin_seg))
+        fd.write("Unzip seg. result %.3f seconds." %(begin_recog - end_seg))
+        fd.write("Recog. %.3f seconds." %(end_recog - begin_recog))
+        fd.write("Combine & delete %.3f seconds." %(end_ocropy - end_recog))
+        fd.close()
 
 	return extract_result
 
@@ -180,11 +200,6 @@ def ocr_exec_mulP(image, parameters):
 	args = [(image, threshold_1), (image, threshold_2), (image, threshold_3)]
 	pool = Pool(3)
 	coord_lists = pool.map(bin_seg, args)
-	print("+++++++++")
-	print(coord_lists)
-	print("+++++++++")
-	return
-
 
 	# Get the common coordinates list
 	cmn_coord_list = getCommonItem(coord_lists)
