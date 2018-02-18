@@ -119,11 +119,15 @@ def ocr_exec(image, parameters):
 	for img_seg in os.listdir(path_seg_images):
 		img_seg_base, img_seg_ext = str(img_seg).split(".")
 		img_seg_path = os.path.join(path_seg_images, img_seg)
+		#call_recog((img_seg_path, paras_recog, path_recog)) # single process
 		jobs.append((img_seg_path, paras_recog, path_recog))
 	# Call recognition service with multiple processes, # processes = # CPU by default
 	begin_recog = time.time()
-	pool = mp.Pool(maxtasksperchild=3)
+	pool = mp.Pool(processes=15)
 	pool.map(call_recog, jobs)
+	# Close pool of processes after they are finished
+	pool.close()
+	pool.join()
 	end_recog = time.time()
 	
 	##########################################################
@@ -149,13 +153,13 @@ def ocr_exec(image, parameters):
 	end_ocropy = time.time()
 
 	#with open("ocropy_time_inner.txt", "wb") as fd:
-	print("Before Bin. %.3f seconds." %(begin_bin - start_time))
-	print("Bin. %.3f seconds." %(end_bin - begin_bin))
-	print("Store bin. result %.3f seconds." %(begin_seg - end_bin))
-	print("Seg. %.3f seconds." %(end_seg - begin_seg))
-	print("Unzip seg. result %.3f seconds." %(begin_recog - end_seg))
+	#print("Before Bin. %.3f seconds." %(begin_bin - start_time))
+	#print("Bin. %.3f seconds." %(end_bin - begin_bin))
+	#print("Store bin. result %.3f seconds." %(begin_seg - end_bin))
+	#print("Seg. %.3f seconds." %(end_seg - begin_seg))
+	#print("Unzip seg. result %.3f seconds." %(begin_recog - end_seg))
 	print("Recog. %.3f seconds." %(end_recog - begin_recog))
-	print("Combine & delete %.3f seconds." %(end_ocropy - end_recog))
+	#print("Combine & delete %.3f seconds." %(end_ocropy - end_recog))
 		#fd.close()
 
 	return extract_result

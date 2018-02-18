@@ -65,9 +65,9 @@ def ocrView(request, format=None):
     
     end_time = time.time()
     #with open("ocropy_time_out.txt", "wb") as fd:
-    print("Before ocropy %.3f seconds." %(begin_ocropy - start_time))
-    print("Ocropy time %.3f seconds." %(end_ocropy - begin_ocropy))
-    print("After ocropy %.3f seconds." %(end_time - end_ocropy))
+    #print("Before ocropy %.3f seconds." %(begin_ocropy - start_time))
+    #print("Ocropy time %.3f seconds." %(end_ocropy - begin_ocropy))
+    #print("After ocropy %.3f seconds." %(end_time - end_ocropy))
         #fd.close()
 
     return response
