@@ -1,22 +1,42 @@
+
 # FROM directive instructing base image to build upon
-FROM python:2
+FROM centos:7
 
-# Some stuff that everyone has been copy-pasting
-# since the dawn of time.
-ENV PYTHONUNBUFFERED 1
+# Install pip, apache, mod_wsgi
+RUN yum -y install gcc
+RUN yum -y install epel-release
+RUN yum -y update; yum -y install python-pip; yum -y install python-devel
+RUN yum -y install httpd; yum -y install mod_wsgi; systemctl enable httpd.service
+#RUN yum -y install firewalld; firewall-cmd --permanent --add-port=8002/tcp; firewall-cmd --reload
+RUN pip install --upgrade pip
+RUN pip install -U setuptools pip
+RUN yum -y install tkinter
 
-# Set the working directory to /ocropy_bin_ms
-RUN mkdir /ocropy_seg_ms
-WORKDIR /ocropy_seg_ms
+# Set the working directory to /SegmentationService
+RUN mkdir /SegmentationService
+WORKDIR /SegmentationService
 
-# Copy the current directory contents into the container at /ocropy_bin_ms
-ADD . /ocropy_seg_ms/
+# Copy the current directory contents into the container at /SegmentationService
+ADD . /SegmentationService
+
+# Copy the binarization service configuration file inside apache server
+ADD apache_conf/segmentation.conf /etc/httpd/conf.d/
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
 
-# EXPOSE port 8002 to allow communication to/from server
-EXPOSE 8002
+# Clean all installed packages
+RUN yum clean all
+
+# Wrapping up some permissions for the apache user
+RUN usermod -a -G root apache
+RUN chmod 770 /SegmentationService
+RUN chown :apache /SegmentationService
+
+# EXPOSE port 80 to allow communication to/from server
+EXPOSE 80
 
 # CMD specifcies the command to execute to start the server running.
-CMD ["/ocropy_seg_ms/start.sh"]
+#CMD systemctl start httpd
+#CMD ["bash", "-c", "/usr/sbin/init"]
+ENTRYPOINT ["/usr/sbin/httpd", "-D", "FOREGROUND"]

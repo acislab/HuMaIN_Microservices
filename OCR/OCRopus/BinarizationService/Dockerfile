@@ -1,22 +1,42 @@
+
 # FROM directive instructing base image to build upon
-FROM python:2
+FROM centos:7
 
-# Some stuff that everyone has been copy-pasting
-# since the dawn of time.
-ENV PYTHONUNBUFFERED 1
+# Install pip, apache, mod_wsgi
+RUN yum -y install gcc
+RUN yum -y install epel-release
+RUN yum -y update; yum -y install python-pip; yum -y install python-devel
+RUN yum -y install httpd; yum -y install mod_wsgi; systemctl enable httpd.service
+#RUN yum -y install firewalld; firewall-cmd --permanent --add-port=8001/tcp; firewall-cmd --reload
+RUN pip install --upgrade pip
+RUN pip install -U setuptools pip
+RUN yum -y install tkinter
 
-# Set the working directory to /ocropy_bin_ms
-RUN mkdir /ocropy_bin_ms
-WORKDIR /ocropy_bin_ms
+# Set the working directory to /BinarizationService
+RUN mkdir /BinarizationService
+WORKDIR /BinarizationService
 
-# Copy the current directory contents into the container at /ocropy_bin_ms
-ADD . /ocropy_bin_ms/
+# Copy the current directory contents into the container at /BinarizationService
+ADD . /BinarizationService
+
+# Copy the binarization service configuration file inside apache server
+ADD apache_conf/binarization.conf /etc/httpd/conf.d/
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
 
-# EXPOSE port 8001 to allow communication to/from server
-EXPOSE 8001
+# Clean all installed packages
+RUN yum clean all
+
+# Wrapping up some permissions for the apache user
+RUN usermod -a -G root apache
+RUN chmod 770 /BinarizationService
+RUN chown :apache /BinarizationService
+
+# EXPOSE port 80 to allow communication to/from server
+EXPOSE 80
 
 # CMD specifcies the command to execute to start the server running.
-CMD ["/ocropy_bin_ms/start.sh"]
+#CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
+#CMD ["bash", "-c", "/usr/sbin/init"]
+ENTRYPOINT ["/usr/sbin/httpd", "-D", "FOREGROUND"]
