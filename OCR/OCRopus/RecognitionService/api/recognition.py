@@ -63,7 +63,7 @@ args_default = {
 
 # The global variable
 args = {}
-logger = logging.getLogger('django')
+logger = logging.getLogger('recognition')
 
 # The entry of segmentation service
 # Return the directories, each directory related to a input image and stored the segmented line images  

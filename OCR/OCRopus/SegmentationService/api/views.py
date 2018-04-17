@@ -48,7 +48,7 @@ def index(request):
 @api_view(['GET', 'POST'])
 def segmentationView(request, format=None):
     receive_req = time.time()
-    logger = logging.getLogger('django')
+    logger = logging.getLogger('segmentation')
     if request.data.get('image') is None:
         logger.error("Please upload only one image")
         return Response("ERROR: Please upload an image", status=status.HTTP_400_BAD_REQUEST)

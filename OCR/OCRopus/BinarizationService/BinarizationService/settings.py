@@ -15,13 +15,11 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open('/etc/secret_key_bin.txt') as f:
-    SECRET_KEY = f.read().strip()
+SECRET_KEY = "!9t335z$3zj3q%9$+*_v2@hzl1cbytsu7wr8aq#z(0-u4fyxfa"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -92,25 +90,23 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'log/debug.log'),
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'log/binarization.log'),
+            'when': 'W0',
+            'backupCount': 52,
             'formatter': 'verbose'
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
+        'binarization': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
             'propagate': True,
         },
-        'django.request': {
-            'handlers': ['console', 'file'],
+        'binarization.request': {
+            'handlers': ['file'],
             'level': 'ERROR',
             'propagate': False,
         },

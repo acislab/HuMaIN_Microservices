@@ -32,7 +32,6 @@ from wsgiref.util import FileWrapper
 from .binarization import binarization_exec
 from .extrafunc import resize_image, del_service_files
 import sys, os, os.path
-import time
 import logging
 
 # Set encoding
@@ -50,8 +49,7 @@ def index(request):
 @csrf_exempt
 @api_view(['GET', 'POST'])
 def binarizationView(request, format=None):
-    receive_req = time.time()
-    logger = logging.getLogger('django')
+    logger = logging.getLogger('binarization')
     if request.data.get('image') is None:
         logger.error("Please upload only one image")
         return Response("ERROR: Please upload only one image", status=status.HTTP_400_BAD_REQUEST)
@@ -69,11 +67,8 @@ def binarizationView(request, format=None):
     except:
         return Response("ERROR: Re-size image error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
- 
     ### Call OCR binarization function
-    bin_begin = time.time()
     output_file = binarization_exec(image_object, parameters)
-    bin_end = time.time()
     if output_file is None:
         logger.error("sth wrong with binarization")
         return Response("ERROR: sth wrong with binarization", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -81,13 +76,5 @@ def binarizationView(request, format=None):
     ### Return image object (in memory)
     response = HttpResponse(content_type="image/png")
     output_file.save(response, "PNG")
-
-
-    send_resp = time.time()
-    logger.info("===== Image %s =====" % str(image_object))
-    logger.info("*** Before bin: %.2fs ***" % (bin_begin-receive_req))
-    logger.info("*** Bin: %.2fs ***" % (bin_end-bin_begin))
-    logger.info("*** After bin: %.2fs ***" % (send_resp-bin_end))
-    logger.info("*** Service time: %.2fs ***" % (send_resp-receive_req))
     
     return response

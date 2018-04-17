@@ -59,7 +59,7 @@ args_default = {
 
 # The global variable
 args = {}
-logger = logging.getLogger('django')
+logger = logging.getLogger('binarization')
 
 # The entry of binarization service
 def binarization_exec(image, parameters):

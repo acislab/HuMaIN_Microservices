@@ -42,8 +42,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open('/etc/secret_key_recog.txt') as f:
-    SECRET_KEY = f.read().strip()
+SECRET_KEY = "n32qtgg4)uim#^vxh%k=-&y%4yzs+1d*clerflk*pl*k^0t@f!"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -106,25 +105,23 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'log/debug.log'),
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'log/recognition.log'),
+            'when': 'W0',
+            'backupCount': 52,
             'formatter': 'verbose'
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
+        'recognition': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
             'propagate': True,
         },
-        'django.request': {
-            'handlers': ['console', 'file'],
+        'recognition.request': {
+            'handlers': ['file'],
             'level': 'ERROR',
             'propagate': False,
         },

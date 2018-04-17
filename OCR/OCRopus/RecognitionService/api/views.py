@@ -49,7 +49,7 @@ def index(request):
 @api_view(['GET', 'POST'])
 def recognitionView(request, format=None):
     receive_req = time.time()
-    logger = logging.getLogger('django')
+    logger = logging.getLogger('recognition')
     if request.data.get('image') is None:
         logger.error("Please upload only one image")
         return Response("ERROR: Please upload an image", status=status.HTTP_400_BAD_REQUEST)
