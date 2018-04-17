@@ -1,0 +1,4 @@
+env
+testimages/*
+data/*
+docker-compose.yaml
