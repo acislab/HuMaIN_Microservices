@@ -26,24 +26,19 @@ from itertools import product
 from contextlib import contextmanager
 import cv2, zipfile, StringIO
 import io, os, subprocess, glob, shutil
-import time
 
 ### OCRopus services information
 IP = "10.5.146.92"
-BIN_PORT = "8001"
-SEG_PORT = "8003"
-RECOG_PORT = "8004"
+BIN_PORT = "30001"
+SEG_PORT = "30002"
+RECOG_PORT = "30003"
 URL_BIN = "http://" + IP + ":" + BIN_PORT + "/binarizationapi"
 URL_SEG = "http://" + IP + ":" + SEG_PORT + "/segmentationapi"
 URL_RECOG = "http://" + IP + ":" + RECOG_PORT + "/recognitionapi"
 
-# Record the # of images, creating intermediate folder with CT, in case of processing images with same name
-CT = 0 
 
 def ocr_exec(image, parameters):
-	start_time = time.time()
 	dataDir = settings.MEDIA_ROOT
-	global CT
 
 	paras_bin = {}
 	paras_seg = {}
@@ -62,17 +57,15 @@ def ocr_exec(image, parameters):
 			continue
 	# Create a floder for this image to store the intermediate data
 	img_base, img_ext = os.path.splitext(str(image))
-	path_data = dataDir + "/" + img_base + "_" + str(CT)
-	CT += 1
+	path_data = dataDir + "/" + img_base
+
 	if not os.path.isdir(path_data):
 		subprocess.call(["mkdir -p " + path_data], shell=True)
 	
 	#####################################
 	##### Call binarization service #####
 	#####################################
-	begin_bin = time.time()
 	resp_bin = requests.get(URL_BIN, files={'image': image}, data=paras_bin)
-	end_bin = time.time()
 	img_bin_name = img_base + "_bin.png"
 	img_bin_path = os.path.join(path_data, img_bin_name)
 	# Save the responsed binarized image
@@ -84,13 +77,12 @@ def ocr_exec(image, parameters):
 		print("Image %s Binarization failed!" % image)
 		shutil.rmtree(path_data)
 		return None
-	
+
+
 	#####################################
 	##### Call segmentation service #####
 	#####################################
-	begin_seg = time.time()
 	resp_seg = requests.get(URL_SEG, files={'image': open(img_bin_path, 'rb')}, data=paras_seg)
-	end_seg = time.time()
 	path_seg = path_data + "/" + "seg" # Unzip segmented images floder under this folder
 	if not os.path.isdir(path_seg):
 		subprocess.call(["mkdir -p " + path_seg], shell=True)
@@ -103,6 +95,7 @@ def ocr_exec(image, parameters):
 		print("Image %s Segmentation error!" % bin_img_name)
 		shutil.rmtree(path_data)
 		return None
+
 
 	#####################################
 	##### Call recognition service ######
@@ -122,13 +115,12 @@ def ocr_exec(image, parameters):
 		#call_recog((img_seg_path, paras_recog, path_recog)) # single process
 		jobs.append((img_seg_path, paras_recog, path_recog))
 	# Call recognition service with multiple processes, # processes = # CPU by default
-	begin_recog = time.time()
-	pool = mp.Pool(processes=15)
+	pool = mp.Pool()
 	pool.map(call_recog, jobs)
 	# Close pool of processes after they are finished
 	pool.close()
 	pool.join()
-	end_recog = time.time()
+
 	
 	##########################################################
 	##### Concatenate all reconition results in sequence #####
@@ -150,18 +142,6 @@ def ocr_exec(image, parameters):
 	##### Delete the intermediate data #####
 	shutil.rmtree(path_data)
 
-	end_ocropy = time.time()
-
-	#with open("ocropy_time_inner.txt", "wb") as fd:
-	#print("Before Bin. %.3f seconds." %(begin_bin - start_time))
-	#print("Bin. %.3f seconds." %(end_bin - begin_bin))
-	#print("Store bin. result %.3f seconds." %(begin_seg - end_bin))
-	#print("Seg. %.3f seconds." %(end_seg - begin_seg))
-	#print("Unzip seg. result %.3f seconds." %(begin_recog - end_seg))
-	print("Recog. %.3f seconds." %(end_recog - begin_recog))
-	#print("Combine & delete %.3f seconds." %(end_ocropy - end_recog))
-		#fd.close()
-
 	return extract_result
 
 
@@ -181,7 +161,7 @@ def call_recog(job):
 		z.extractall(dstDir)
 	else:
 		print("Image %s Recognition error!" % str(image))
-	return "success"
+
 
 def ocr_exec_mulP(image, parameters):
 	### Default 3 threshold values
