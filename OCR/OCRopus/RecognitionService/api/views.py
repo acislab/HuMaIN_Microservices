@@ -34,7 +34,6 @@ from wsgiref.util import FileWrapper
 from .recognition import recognition_exec
 from .extrafunc import del_service_files
 import sys, os, os.path, zipfile, StringIO, glob
-import time
 import logging
 from PIL import Image
 
@@ -48,7 +47,6 @@ def index(request):
 @csrf_exempt
 @api_view(['GET', 'POST'])
 def recognitionView(request, format=None):
-    receive_req = time.time()
     logger = logging.getLogger('recognition')
     if request.data.get('image') is None:
         logger.error("Please upload only one image")
@@ -71,15 +69,13 @@ def recognitionView(request, format=None):
 
     ### Call OCR recognition function to recognize image in memory
     image_object = request.FILES['image']
-    recog_begin = time.time()
     # output dic. key: file type (e.g., content-.txt, locaton-.llocs, and probability-.prob). value: contents in memory
     recog_dic = recognition_exec(image_object, parameters, modelpath)
-    recog_end = time.time()
-    if not recog_dic: # if output is emplty
+    if recog_dic is None: # if output is empty
         if modelpath is not None:
             del_service_files(modelpath)
         logger.error("sth wrong with recognition")
-        return Response("ERROR: sth wrong with segmentation", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response("ERROR: sth wrong with recognition", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     ### Return the multiple files in zip type
     # Folder name in ZIP archive which contains the above files
@@ -103,12 +99,5 @@ def recognitionView(request, format=None):
     # Delete recognized model if it was uploaded by user
     if modelpath is not None:
             del_service_files(modelpath)
-
-    send_resp = time.time()
-    logger.info("===== Image %s =====" % str(image_object))
-    logger.info("*** Before recog: %.2fs ***" % (recog_begin-receive_req))
-    logger.info("*** Recog: %.2fs ***" % (recog_end-recog_begin))
-    logger.info("*** After recog: %.2fs ***" % (send_resp-recog_end))
-    logger.info("*** Service time: %.2fs ***" % (send_resp-receive_req))
 
     return response

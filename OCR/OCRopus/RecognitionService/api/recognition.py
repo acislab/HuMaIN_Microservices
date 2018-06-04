@@ -82,7 +82,7 @@ def recognition_exec(image, parameters, *model):
     get_linenormalizer()
 
     # Recognize the single-line image
-    recog_dic = []
+    recog_dic = None
     try:
         recog_dic = process(image)
     except OcropusException as e:
@@ -163,7 +163,8 @@ def process(image):
         check = check_line(amax(line)-line)
         if check is not None:
             logger.error("%s SKIPPED %s (use -n to disable this check)" % (image, check))
-            return (0,[],0,image)
+            #return (0,[],0,image)
+            return None
 
     temp = amax(line)-line
     temp = temp*1.0/amax(temp)

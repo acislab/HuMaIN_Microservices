@@ -32,7 +32,6 @@ from django.shortcuts import render
 from .segmentation import segmentation_exec
 from .extrafunc import del_service_files
 import sys, os, os.path, zipfile, StringIO
-import time
 import logging
 import tarfile, io
 
@@ -47,7 +46,6 @@ def index(request):
 @csrf_exempt
 @api_view(['GET', 'POST'])
 def segmentationView(request, format=None):
-    receive_req = time.time()
     logger = logging.getLogger('segmentation')
     if request.data.get('image') is None:
         logger.error("Please upload only one image")
@@ -66,9 +64,7 @@ def segmentationView(request, format=None):
     
     image_object = request.FILES['image']
     ### Call segmentation function
-    seg_begin = time.time()
     seg_result = segmentation_exec(image_object, parameters)
-    seg_end = time.time()
     if not seg_result: # if output_list is empty
         logger.error("sth wrong with segmentation")
         return Response("ERROR: sth wrong with segmentation", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -99,11 +95,4 @@ def segmentationView(request, format=None):
     # And correct content-disposition
     response["Content-Disposition"] = 'attachment; filename=%s' % zip_name
     
-
-    send_resp = time.time()
-    logger.info("===== Image %s =====" % str(image_object))
-    logger.info("*** Before seg: %.2fs ***" % (seg_begin-receive_req))
-    logger.info("*** Seg: %.2fs ***" % (seg_end-seg_begin))
-    logger.info("*** After seg: %.2fs ***" % (send_resp-seg_end))
-    logger.info("*** Service time: %.2fs ***" % (send_resp-receive_req))
     return response
