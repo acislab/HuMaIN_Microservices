@@ -1,19 +1,16 @@
 
 # FROM directive instructing base image to build upon
 FROM centos:7
-LABEL maintainer="jingchaoluan@gmail.com"
-ENV container=docker
 
 # Install pip, apache, mod_wsgi
 RUN yum -y install gcc
 RUN yum -y install epel-release
 RUN yum -y update; yum -y install python-pip; yum -y install python-devel
 RUN yum -y install httpd; yum -y install mod_wsgi; systemctl enable httpd.service
-RUN yum -y install tkinter
+#RUN yum -y install firewalld; firewall-cmd --permanent --add-port=8002/tcp; firewall-cmd --reload
 RUN pip install --upgrade pip
 RUN pip install -U setuptools pip
-#RUN yum -y install firewalld; firewall-cmd --permanent --add-port=8003/tcp; firewall-cmd --reload
-
+RUN yum -y install tkinter
 
 # Set the working directory to /RecognitionService
 RUN mkdir /RecognitionService
