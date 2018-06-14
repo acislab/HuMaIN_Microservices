@@ -28,7 +28,7 @@ from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse, FileResponse
-from .ocr import ocr_exec
+from .ocropy import ocropy_exec
 import os
 
 def index(request):
@@ -47,7 +47,7 @@ def ocropyView(request, format=None):
     del parameters['image'] # parameter 'image' will be processed seperately
     
     image_object = request.FILES['image']
-    extract_result = ocr_exec(image_object, parameters)
+    extract_result = ocropy_exec(image_object, parameters)
     if extract_result is None:
         return Response("ERROR: sth wrong with OCRopus service", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

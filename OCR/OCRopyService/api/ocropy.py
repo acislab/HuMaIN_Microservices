@@ -29,15 +29,15 @@ import io, os, subprocess, glob, shutil
 
 ### OCRopus services information
 IP = "10.5.146.92"
-BIN_PORT = "30001"
-SEG_PORT = "30002"
-RECOG_PORT = "30003"
+BIN_PORT = "31001"
+SEG_PORT = "31002"
+RECOG_PORT = "31003"
 URL_BIN = "http://" + IP + ":" + BIN_PORT + "/binarizationapi"
 URL_SEG = "http://" + IP + ":" + SEG_PORT + "/segmentationapi"
 URL_RECOG = "http://" + IP + ":" + RECOG_PORT + "/recognitionapi"
 
 
-def ocr_exec(image, parameters):
+def ocropy_exec(image, parameters):
 	dataDir = settings.MEDIA_ROOT
 
 	paras_bin = {}
@@ -77,6 +77,7 @@ def ocr_exec(image, parameters):
 		print("Image %s Binarization failed!" % image)
 		shutil.rmtree(path_data)
 		return None
+	print("Binarization over!!!")
 
 
 	#####################################
@@ -95,7 +96,7 @@ def ocr_exec(image, parameters):
 		print("Image %s Segmentation error!" % bin_img_name)
 		shutil.rmtree(path_data)
 		return None
-
+	print("Segmentation over!!!")
 
 	#####################################
 	##### Call recognition service ######
@@ -110,12 +111,11 @@ def ocr_exec(image, parameters):
 	# Call recognition service for each segmented images
 	jobs = []
 	for img_seg in os.listdir(path_seg_images):
-		img_seg_base, img_seg_ext = str(img_seg).split(".")
 		img_seg_path = os.path.join(path_seg_images, img_seg)
 		#call_recog((img_seg_path, paras_recog, path_recog)) # single process
 		jobs.append((img_seg_path, paras_recog, path_recog))
 	# Call recognition service with multiple processes, # processes = # CPU by default
-	pool = mp.Pool()
+	pool = mp.Pool(processes=3)
 	pool.map(call_recog, jobs)
 	# Close pool of processes after they are finished
 	pool.close()

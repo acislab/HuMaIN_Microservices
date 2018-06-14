@@ -56,7 +56,7 @@ ROOT_URLCONF = 'OCRopyService.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [(os.path.join(BASE_DIR, 'templates'))],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -124,6 +124,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Service base urls
 OCROPY_SERVICE_BASE_URL = "http://ocropyservice.acis.ufl.edu"
+
 ### custom variables
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 MEDIA_ROOT = os.path.join(BASE_DIR, 'data')
