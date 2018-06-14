@@ -1,4 +1,3 @@
-
 # FROM directive instructing base image to build upon
 FROM centos:7
 
@@ -24,6 +23,7 @@ ADD apache_conf/ocropy.conf /etc/httpd/conf.d/
 
 # Install any needed packages specified in requirements.txt
 RUN pip install -r requirements.txt
+RUN yum install -y libSM libXext libXrender
 
 # Clean all installed packages
 RUN yum clean all
@@ -36,7 +36,5 @@ RUN chown :apache /OCRopyService
 # EXPOSE port 80 to allow communication to/from server
 EXPOSE 80
 
-# CMD specifcies the command to execute to start the server running.
-#CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
-#CMD ["bash", "-c", "/usr/sbin/init"]
+# Specifcies the entrypoint to start the Apache server.
 ENTRYPOINT ["/usr/sbin/httpd", "-D", "FOREGROUND"]
