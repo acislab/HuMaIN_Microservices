@@ -1,5 +1,6 @@
 env
 testimages/*
 data/*
-docker-compose.yaml
 log/*
+kube_manifest/*
+istio/*
