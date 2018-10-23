@@ -5,7 +5,7 @@ metadata:
   labels:
     app: recognition
 spec:
-  replicas: 3
+  replicas: 1
   revisionHistoryLimit: 3
   progressDeadlineSeconds: 600
   strategy:
@@ -28,9 +28,10 @@ spec:
         - containerPort: 80
         resources:
           limits:
-            memory: "1024Mi"
-        #    cpu: "1"
+            #memory: "2Gi"
+            cpu: "1"
           requests:
+            memory: "512Mi"
             cpu: "0.5"
         securityContext:
           privileged: true
@@ -63,10 +64,7 @@ spec:
     kind: Deployment
     name: recognition
   minReplicas: 1
-  maxReplicas: 20
-#  targetCPUUtilizationPercentage: 80 # can only be used in version 'v1'
-
-### Following metrics can be used in version 'v2beta1'
+  maxReplicas: 10
   metrics:
     - type: Resource
       resource:
