@@ -30,13 +30,10 @@ from django.core.files.storage import default_storage
 from django.http import HttpResponse
 from django.conf import settings
 from django.shortcuts import render
-from wsgiref.util import FileWrapper
 from .recognition import recognition_exec
 from .extrafunc import del_service_files
-import sys, os, os.path, zipfile, StringIO, glob
+import sys, os, os.path, zipfile, StringIO
 import logging
-from PIL import Image
-
 
 # Get the directory which stores the model set by user
 dataDir = settings.MEDIA_ROOT

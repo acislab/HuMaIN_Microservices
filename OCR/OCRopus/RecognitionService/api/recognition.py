@@ -89,7 +89,7 @@ def recognition_exec(image, parameters, *model):
         if e.trace:
             traceback.print_exc()
         else:
-            logger.info(image+": "+e)
+            logger.error(image+": "+e)
     except Exception as e:
         traceback.print_exc()
     
@@ -199,8 +199,8 @@ def process(image):
     if not args['nonormalize']:
         pred = ocrolib.normalize_text(pred)
 
-    if not args['quiet']:
-        logger.info(str(image)+": "+pred)
+    #if not args['quiet']:
+        #logger.info(str(image)+": "+pred)
     
     ### output recognized contents
     output_dic['txt'] = pred.encode('UTF-8')

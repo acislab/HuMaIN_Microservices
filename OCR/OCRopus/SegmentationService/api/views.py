@@ -20,7 +20,6 @@
 # limitations under the License.
 ##########################################################################################
 
-
 from __future__ import unicode_literals
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -30,10 +29,8 @@ from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 from django.shortcuts import render
 from .segmentation import segmentation_exec
-from .extrafunc import del_service_files
 import sys, os, os.path, zipfile, StringIO
 import logging
-import tarfile, io
 
 
 # Get the directory which stores all input and output files
@@ -57,8 +54,6 @@ def segmentationView(request, format=None):
     keys = parameters.keys()
     if 'usegauss' in keys:
         keys.remove('usegauss')
-    if 'coordinate' in keys:
-        keys.remove('coordinate') 
     for key in keys:
         parameters[key] = float(parameters[key])
     
@@ -68,10 +63,6 @@ def segmentationView(request, format=None):
     if not seg_result: # if output_list is empty
         logger.error("sth wrong with segmentation")
         return Response("ERROR: sth wrong with segmentation", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    ### Return coordinates list
-    if ('coordinate' in parameters) and (parameters['coordinate']):
-        return JsonResponse(seg_result, safe=False)
 
     ### Else return the segmented images in zip type
     # Folder name in ZIP archive which contains the above files

@@ -46,12 +46,12 @@ from ocrolib.exceptions import OcropusException
 from ocrolib.toplevel import *
 from numpy import amax, amin
 from django.conf import settings
-import logging, time
+import logging
 
 
 # The default parameters values
 args_default = {
-    ### The following 12 parameters can be set by user
+    ### The following 15 parameters can be set by user
     # limits
     'minscale':1.0,  # minimum scale permitted
     'maxlines':300,  # maximum # lines permitted
@@ -109,7 +109,7 @@ def segmentation_exec(image, parameters):
         if e.trace:
             traceback.print_exc()
         else:
-            logger.info(image+":"+e)
+            logger.error(image+":"+e)
     except Exception as e:
         traceback.print_exc()
     
@@ -151,7 +151,7 @@ def DSAVE(title,image):
         assert len(image)==3
         image = transpose(array(image),[1,2,0])
     fname = "_"+title+".png"
-    logger.info("debug " + fname)
+    #logger.info("debug " + fname)
     imsave(fname,image)
 
 
@@ -221,11 +221,11 @@ def compute_colseps_conv(binary,scale=1.0):
 
 def compute_colseps(binary,scale):
     """Computes column separators either from vertical black lines or whitespace."""
-    logger.info("considering at most %g whitespace column separators" % args['maxcolseps'])
+    #logger.info("considering at most %g whitespace column separators" % args['maxcolseps'])
     colseps = compute_colseps_conv(binary,scale)
     DSAVE("colwsseps",0.7*colseps+0.3*binary)
     if args['maxseps']>0:
-        logger.info("considering at most %g black column separators" % args['maxseps'])
+        #logger.info("considering at most %g black column separators" % args['maxseps'])
         seps = compute_separators_morph(binary,scale)
         DSAVE("colseps",0.7*seps+0.3*binary)
         colseps = maximum(colseps,seps)
@@ -312,20 +312,20 @@ def compute_segmentation(binary,scale):
     binary = remove_hlines(binary,scale)
 
     # do the column finding
-    if not args['quiet']: logger.info("computing column separators")
+    #if not args['quiet']: logger.info("computing column separators")
     colseps,binary = compute_colseps(binary,scale)
 
     # now compute the text line seeds
-    if not args['quiet']: logger.info("computing lines")
+    #if not args['quiet']: logger.info("computing lines")
     bottom,top,boxmap = compute_gradmaps(binary,scale)
     seeds = compute_line_seeds(binary,bottom,top,colseps,scale)
     DSAVE("seeds",[bottom,top,boxmap])
 
     # spread the text line seeds to all the remaining
     # components
-    if not args['quiet']: logger.info("propagating labels")
+    #if not args['quiet']: logger.info("propagating labels")
     llabels = morph.propagate_labels(boxmap,seeds,conflict=0)
-    if not args['quiet']: logger.info("spreading labels")
+    #if not args['quiet']: logger.info("spreading labels")
     spread = morph.spread_labels(seeds,maxdist=scale)
     llabels = where(llabels>0,llabels,spread*binary)
     segmentation = llabels*binary
@@ -361,7 +361,7 @@ def process(image):
         scale = psegutils.estimate_scale(binary)
     else:
         scale = args['scale']
-    logger.info("scale %f" % (scale))
+    #logger.info("scale %f" % (scale))
     if isnan(scale) or scale>1000.0:
         logger.error("%s: bad scale (%g); skipping\n" % (image, scale))
         return
@@ -370,18 +370,18 @@ def process(image):
         return
 
     # find columns and text lines
-    if not args['quiet']: 
-        logger.info("computing segmentation")
+    #if not args['quiet']: 
+        #logger.info("computing segmentation")
     segmentation = compute_segmentation(binary,scale)
     if amax(segmentation)>args['maxlines']:
         logger.error("%s: too many lines %g" % (image, amax(segmentation)))
         return
-    if not args['quiet']: 
-        logger.info("number of lines %g" % amax(segmentation))
+    #if not args['quiet']: 
+        #logger.info("number of lines %g" % amax(segmentation))
 
     # compute the reading order
-    if not args['quiet']: 
-        logger.info("finding reading order")
+    #if not args['quiet']: 
+        #logger.info("finding reading order")
     lines = psegutils.compute_lines(segmentation,scale)
     order = psegutils.reading_order([l.bounds for l in lines])
     lsort = psegutils.topsort(order)
@@ -393,21 +393,12 @@ def process(image):
     segmentation = renumber[segmentation]
 
     # finally, output everything
-    if not args['quiet']: 
-        logger.info("writing lines")
+    #if not args['quiet']: 
+        #logger.info("writing lines")
     lines = [lines[i] for i in lsort]
     cleaned = ocrolib.remove_noise(binary,args['noise'])
 
-    ### Return coordinates list
-    if args['coordinate']:
-        coord_list = []
-        for line in lines:
-            y0, x0, y1, x1 = [int(x) for x in [line.bounds[0].start, line.bounds[1].start, \
-                                                line.bounds[0].stop, line.bounds[1].stop]]
-            coord_list.append((x0-args['pad'], y0-args['pad'], x1+args['pad'], y1+args['pad']))
-        return coord_list
-
-    ### Or return image objects dictionary (in memory)
+    ### Return image objects dictionary (in memory)
     output_dic = {}  # key: single-line image name. value: single-line image object
     for index, line in enumerate(lines):
         binline = psegutils.extract_masked(1-cleaned,line,pad=args['pad'],expand=args['expand'])
@@ -417,6 +408,6 @@ def process(image):
         image_pil = ocrolib.array2pil(image_array)
         key = imagename_base + "_%d.png" % (index+1)
         output_dic[key] = image_pil
-    logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
+    #logger.info("%6d  %s %4.1f %d" % (i, image,  scale,  len(lines)))
 
     return output_dic

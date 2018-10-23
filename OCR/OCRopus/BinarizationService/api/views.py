@@ -2,8 +2,8 @@
 ##########################################################################################
 # Developer: Luan,Jingchao        Project: HuMaIN (http://humain.acis.ufl.edu)
 # Description: 
-#     Receive OCRopus binarization service requests from user, call binarization function 
-# and get the output, and then return the output or error info to user.
+#     Receive OCRopus binarization service requests from user, binarizing in memory, get 
+# the output, and then return the output or error info to user.
 ##########################################################################################
 # Copyright 2017    Advanced Computing and Information Systems (ACIS) Lab - UF
 #                   (https://www.acis.ufl.edu/)
@@ -21,16 +21,15 @@
 ##########################################################################################
 
 from __future__ import unicode_literals
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.conf import settings
 from django.shortcuts import render
-from wsgiref.util import FileWrapper
 from .binarization import binarization_exec
-from .extrafunc import resize_image, del_service_files
+from .extrafunc import resize_image
 import sys, os, os.path
 import logging
 
@@ -45,7 +44,6 @@ dataDir = settings.MEDIA_ROOT
 def index(request):
     return render(request, 'index.html')
 
-### New version: process image in-memory => response output image from memory
 @csrf_exempt
 @api_view(['GET', 'POST'])
 def binarizationView(request, format=None):
@@ -76,5 +74,5 @@ def binarizationView(request, format=None):
     ### Return image object (in memory)
     response = HttpResponse(content_type="image/png")
     output_file.save(response, "PNG")
-    
+
     return response

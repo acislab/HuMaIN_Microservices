@@ -1,11 +1,9 @@
-
 # -*- coding: utf-8 -*-
 #!/usr/bin/env python
 ##########################################################################################
 # Developer: Luan,Jingchao        Project: HuMaIN (http://humain.acis.ufl.edu)
 # Description: 
-#     Convert a image from grayscale to black and white, based on the default parameters or
-# parameters set by user.
+#     This module rpovides extra functions like resize image and clear intermedia data
 ##########################################################################################
 # Copyright 2017    Advanced Computing and Information Systems (ACIS) Lab - UF
 #                   (https://www.acis.ufl.edu/)
@@ -26,9 +24,6 @@ from resizeimage import resizeimage # Used for image resize
 from django.core.exceptions import ValidationError
 import sys, os, os.path, shutil
 
-'''
-This module rpovides extra functions
-'''
 
 ### Check the validation of the uploaded images
 def validate_image_extension(value):
@@ -52,10 +47,10 @@ def resize_image(old_image):
         if h<600: h = 600
         new_size = [w, h]
         new_image = resizeimage.resize_contain(img, new_size)
+        img.close()
         return new_image
     else:
         return old_image
-        pass
 
 
 ### Delete all files related to this service time, including inputs and outputs

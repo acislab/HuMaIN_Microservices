@@ -4,6 +4,8 @@
 # Description: 
 #     Convert a image from grayscale to black and white, based on the default parameters or
 # parameters set by user.
+#     Image binarization using non-linear processing.
+#     This is a compute-intensive binarization method.
 ##########################################################################################
 # Copyright 2017    Advanced Computing and Information Systems (ACIS) Lab - UF
 #                   (https://www.acis.ufl.edu/)
@@ -21,22 +23,16 @@
 ##########################################################################################
 
 from __future__ import print_function
-from pylab import *
-from numpy.ctypeslib import ndpointer
-import os, os.path
 from scipy.ndimage import filters, interpolation, morphology, measurements
 from scipy import stats
+from numpy import amax, amin
+from numpy.ctypeslib import ndpointer
+from pylab import *
 import ocrolib
 import PIL, numpy
-from numpy import amax, amin
 import logging
+import os, os.path
 
-
-"""
-Image binarization using non-linear processing.
-This is a compute-intensive binarization method that works on degraded
-and historical book pages.
-"""
 
 ### The default parameters values
 args_default = {
