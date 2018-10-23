@@ -1,5 +1,6 @@
-django==1.11
+django>=1.11.15
 djangorestframework
+mod_wsgi
 
 # ocr requirements
 numpy>=1.9.2
