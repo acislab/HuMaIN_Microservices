@@ -2,8 +2,8 @@
 ##########################################################################################
 # Developer: Luan,Jingchao        Project: HuMaIN (http://humain.acis.ufl.edu)
 # Description: 
-#	Script to invoke the OCRopus Binarization microservice. Given the images' directory or
-# an image, return binarized image(s).
+#	Script to invoke the OCRopus Recognition microservice. Given the images' directory or
+# an image, return recognized file(s).
 ##########################################################################################
 # Copyright 2017    Advanced Computing and Information Systems (ACIS) Lab - UF
 #                   (https://www.acis.ufl.edu/)
@@ -19,15 +19,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ##########################################################################################
-import requests
-import argparse, os, sys
+import requests, zipfile, StringIO
+import time, argparse, os
 import multiprocessing as mp
 
-# Binarization service URL
+# Recognition service URL
 IP = "10.5.146.92"
-PORT = "8101"
-URL_BIN = "http://" + IP + ":" + PORT + "/binarizationapi"
+PORT = "8103"
+URL_RECOG = "http://" + IP + ":" + PORT + "/recognitionapi"
 SESSION = requests.Session()
+
+
+def str2bool(v):
+	"""Transfer String to Boolean.
+	
+	Normalizing all positive string to "True" and all negative string to "False".
+
+	Args:
+		v: original string.
+	Returns:
+		Return the original string related boolean. For example, return "True" if the original string is "yes".
+	"""
+	if v.lower() in ('yes', 'true', 't', 'y', '1'):
+		return True
+	elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+		return False
+	else:
+		raise argparse.ArgumentTypeError('Boolean value expected.')
 
 
 def arg_parse():
@@ -35,20 +53,16 @@ def arg_parse():
 	Returns:
 		A dictionary-like type viriable 'args' which contains all arguments input by user
 	"""
-	parser = argparse.ArgumentParser("Call OCRopy Binarization Service")
+	parser = argparse.ArgumentParser("Call OCRopy Recognition Service")
 
 	parser.add_argument('input', help="The path of an image file, or a folder containing all pre-process images.")
-	parser.add_argument('-o','--output',default=None, help="output directory, without the last slash")
-	parser.add_argument('-t','--threshold',type=float, default=argparse.SUPPRESS, help='threshold, determines lightness')
-	parser.add_argument('-z','--zoom',type=float,default=argparse.SUPPRESS, help='zoom for page background estimation, smaller=faster')
-	parser.add_argument('-e','--escale',type=float,default=argparse.SUPPRESS, help='scale for estimating a mask over the text region')
-	parser.add_argument('-b','--bignore',type=float,default=argparse.SUPPRESS, help='ignore this much of the border for threshold estimation')
-	parser.add_argument('-p','--perc',type=float,default=argparse.SUPPRESS, help='percentage for filters')
-	parser.add_argument('-r','--range',type=int,default=argparse.SUPPRESS, help='range for filters')
-	parser.add_argument('-m','--maxskew',type=float,default=argparse.SUPPRESS, help='skew angle estimation parameters (degrees)')
-	parser.add_argument('-lo','--lo',type=float,default=argparse.SUPPRESS, help='percentile for black estimation')
-	parser.add_argument('-hi','--hi',type=float,default=argparse.SUPPRESS, help='percentile for white estimation')
-	parser.add_argument('--skewsteps',type=int,default=argparse.SUPPRESS, help='steps for skew angle estimation (per degree)')
+	parser.add_argument('-o','--output',default=None,help="output directory, without the last slash")
+	parser.add_argument('-m','--model',default=argparse.SUPPRESS, help="line recognition model")
+	parser.add_argument("-l","--height",default=argparse.SUPPRESS,type=int, help="target line height (overrides recognizer)")
+	parser.add_argument("-p","--pad",default=argparse.SUPPRESS,type=int, help="extra blank padding to the left and right of text line")
+	parser.add_argument('-N',"--nonormalize", type=str2bool, help="don't normalize the textual output from the recognizer")
+	parser.add_argument('-llocs','--llocs', type=str2bool, help="output LSTM locations for characters")
+	parser.add_argument('-prob','--probabilities', type=str2bool, help="output probabilities for each letter")
 
 	args = parser.parse_args()
 
@@ -71,45 +85,42 @@ def arg_parse():
 				print("Error: Destination folder %s could not be created" % (args.output))
 				sys.exit(0)
 
-	args = vars(args) # Convert the Namespace object "args" to a dict-like object
+	args = vars(args) # Convert the Namespace object "args" to a dic-like object
 	return args
 
 
-def call_bin(job):
-	"""Call Binarization Service.
+def call_recog(job):
+	"""Call Recognition Service.
 
-	Call the Recognition service, and store the binarized result locally.
+	Call the Recognition service, and store the recognized result locally.
 
 	Args:
 		job: a tuple variable (image path, local path to store result, parametes customed by user).
 	"""
-	imagepath, dst_dir, parameters = job
-
+	imagepath, dst_path, parameters = job
+	
 	# Uploaded iamges
-	image = {'image': open(imagepath, 'rb')}
+	multiple_files = [('image', (imagepath, open(imagepath, 'rb')))]
+	if 'model' in parameters.keys():
+		multiple_files.append(('model', (parameters['model'], open(parameters['model'], 'rb'))))
+		del parameters['model']
+	# Call recognition service and get response
+	resp = SESSION.get(URL_RECOG, files=multiple_files, data=parameters)
 
-	# Call binarization service
-	resp = SESSION.get(URL_BIN, files=image, data=parameters, stream=True)
-
-	# Save the responsed binarized image
-	image = os.path.basename(imagepath)
-	image_name, image_ext = os.path.splitext(image)
-	dstimage = image_name + "_bin.png"
-	dstpath = os.path.join(dst_dir, dstimage)
-
+	# Unpress the zip file responsed from recognition service
 	if resp.status_code == 200:
-		with open(dstpath, 'wb') as fd:
-			for chunk in resp:
-				fd.write(chunk)
-		print("[OK] '%s' binarization success!" % image)
+		# For python 3+, replace with io.BytesIO(resp.content)
+		z = zipfile.ZipFile(StringIO.StringIO(resp.content)) 
+		z.extractall(dst_path) 
+		print("[OK] '%s' recognition success!" % os.path.basename(imagepath))
 	else:
-		print("[ERROR] '%s' binarization error!" % image)
+		print("[ERROR] '%s' recognition error!" % os.path.basename(imagepath))
 
 
 def main(args):
 	"""Main function.
 
-	Call Binarization service for each image sequencially or parallelly.
+	Call Recognition service for each image sequencially or parallelly.
 	"""
 	input_ = args['input']
 	output = args['output']
@@ -118,19 +129,19 @@ def main(args):
 	del args['input']
 	del args['output']
 
-	# Call binarization service
+	# Call recognition service
 	if os.path.isfile(input_):
 		# one image using a single process
-		call_bin((input_, output, args))
+		call_recog((input_, output, args))
 		SESSION.close()
 	elif os.path.isdir(input_):
-		# multiple images using multiple processes to call binarization parallelly
+		# multiple images using multiple processes to call recognition parallelly
 		jobs = []
 		for img in os.listdir(input_):
 			img_path = os.path.join(input_, img)
 			jobs.append((img_path, output, args))
 		pool = mp.Pool(processes=8) # #processes = #CPU by default
-		pool.map(call_bin, jobs)
+		pool.map(call_recog, jobs)
 		# Close processes pool after it is finished
 		pool.close()
 		pool.join()
