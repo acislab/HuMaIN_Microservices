@@ -115,7 +115,7 @@ def ocropy_exec(image, parameters):
 		#call_recog((img_seg_path, paras_recog, path_recog)) # single process
 		jobs.append((img_seg_path, paras_recog, path_recog))
 	# Call recognition service with multiple processes, # processes = # CPU by default
-	pool = mp.Pool(processes=3)
+	pool = mp.Pool(processes=4)
 	pool.map(call_recog, jobs)
 	# Close pool of processes after they are finished
 	pool.close()
