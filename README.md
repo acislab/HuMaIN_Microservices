@@ -1,5 +1,5 @@
 # HuMaIN_Microservices
-Reusable information extraction and image processing microservices. Based on [OCRopus](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib)
+Reusable information extraction and image processing microservices. Based on [OCRopus](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib) and [Tesseract](https://github.com/tesseract-ocr/tesseract)
 
 Containing:<br/>
 1) Four microservices: Binarization, Segemntation and Recognition under directory ‘OCR/OCRopus/ and Tesseract under directory ‘OCR/’.<br/>
@@ -8,13 +8,13 @@ Containing:<br/>
 All microservices **processing images in memory**, different with [OCRopus](https://github.com/tmbdev/ocropy) which need to store the intermediate data locally.<br/>
 
 ## Deployment of Microservices
-Four ways (details are introduced in README.md of each microservice projec):<br/>
+Four ways (details are introduced in README.md of each microservice project):<br/>
 
-* Way-1: Deploy each microservice on the Django built-in server. Details are descriped in the README.md file under each microservice directory.<br/>
+* Way-1: Deploy each microservice on the Django built-in server.<br/>
 Pros: quick to work.<br/>
 Cons: can only handle one request each time.<br/>
 
-* Way-2: Deploy each microservice on Apache server. Details are descriped in the README.md file under each microservice directory.<br/>
+* Way-2: Deploy each microservice on Apache server.<br/>
 Pros: can handle multiple requests concurrently.<br/>
 
 * Way-3: Deploy from Docker image.<br/>
