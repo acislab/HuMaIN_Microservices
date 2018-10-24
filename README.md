@@ -1,39 +1,24 @@
 # HuMaIN_Microservices
-Reusable information extraction and data processing microservices. Based on [OCRopus](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib)
+Reusable information extraction and image processing microservices. Based on [OCRopus](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib)
 
-## Setting Up
-1. Start and activate environment
+Containing:<br/>
+1) Four microservices: Binarization, Segemntation and Recognition under directory ‘OCR/OCRopus/ and Tesseract under directory ‘OCR/’.<br/>
+2) One OCRopy (OCRopus) application under directory ‘OCR/’, which implemented by invoking Binarization, Segmentation and Recognition services. Useful for users who want extract the image information directly.<br/>
 
-	```
-	$ virtualenv env
-	$ source env/bin/activate
-	```
+All microservices **processing images in memory**, different with [OCRopus](https://github.com/tmbdev/ocropy) which need to store the intermediate data locally.<br/>
 
-2. Install requirement packages
-	
-	```
-	$ pip install -r requirements.txt
-	```
-	Note: Install one time under directory '/HuMaIN_Microservices/OCR/OCRopus/' for testing, or install three times under each 	microservice directory like '/HuMaIN_Microservices/OCR/OCRopus/BinarizationService/' for deployment.
+## Deployment of Microservices
+Four ways (details are introduced in README.md of each microservice projec):<br/>
 
-3. Apply updates for each microservice
+* Way-1: Deploy each microservice on the Django built-in server. Details are descriped in the README.md file under each microservice directory.<br/>
+Pros: quick to work.<br/>
+Cons: can only handle one request each time.<br/>
 
-	```
-	$ python manage.py makemigrations
-	$ python manage.py migrate
-	```
-	
-4. Run each microservice respectively
+* Way-2: Deploy each microservice on Apache server. Details are descriped in the README.md file under each microservice directory.<br/>
+Pros: can handle multiple requests concurrently.<br/>
 
-	For Binarization microservice: (under directory '/OCR/OCRopus/BinarizationService/')
-	```
-	$ python manage.py runserver 0.0.0.0:8001
-	```
-	For Segmentation microservice: (under directory '/OCR/OCRopus/SegmentationService/')
-	```
-	$ python manage.py runserver 0.0.0.0:8002
-	```
-	For Recognition microservice:  (under directory '/OCR/OCRopus/RecognitionService/')
-	```
-	$ python manage.py runserver 0.0.0.0:8003
-	```
+* Way-3: Deploy from Docker image.<br/>
+Pros: needn’t to download and deploy the microservice.<br/>
+
+* Way-4: Deploy with Kubernetes.<br/>
+Pros: can handle multiple requests concurrently, and auto-scale the number of instances of microservice to improve its performance remarkably.
