@@ -1,0 +1,42 @@
+kind: Gateway
+metadata:
+  name: ocr-gateway
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ocr
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - ocr-gateway
+  http:
+  - match:
+    - uri:
+        exact: "/binarizationapi"
+    route:
+    - destination:
+        host: binarization.default.svc.cluster.local
+  - match:
+    - uri:
+        exact: "/segmentationapi"
+    route:
+    - destination:
+        host: segmentation.default.svc.cluster.local
+  - match:
+    - uri:
+        exact: "/recognitionapi"
+    route:
+    - destination:
+        host: recognition.default.svc.cluster.local

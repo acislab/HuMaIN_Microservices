@@ -1,0 +1,47 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: binarization
+spec:
+  hosts:
+  - binarization.default.svc.cluster.local
+  gateways:
+  - ocr-gateway
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: binarization.default.svc.cluster.local
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: segmentation
+spec:
+  hosts:
+  - segmentation.default.svc.cluster.local
+  gateways:
+  - ocr-gateway
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: segmentation.default.svc.cluster.local
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: recognition
+spec:
+  hosts:
+  - recognition.default.svc.cluster.local
+  gateways:
+  - ocr-gateway
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: recognition.default.svc.cluster.local
+        subset: v1
