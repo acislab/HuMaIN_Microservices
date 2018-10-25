@@ -1,39 +1,34 @@
 # HuMaIN_Microservices
-Reusable information extraction and data processing microservices. Based on [OCRopus](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib)
+Reusable information extraction and image processing microservices. Based on [OCRopus](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib) and [Tesseract](https://github.com/tesseract-ocr/tesseract)
 
-## Setting Up
-1. Start and activate environment
+Containing:<br/>
+1) Four microservices: Binarization, Segemntation and Recognition services under directory ‘OCR/OCRopus/ and Tesseract service under directory ‘OCR/’.<br/>
+2) One OCRopy (OCRopus) application under directory ‘OCR/’, which implemented by invoking Binarization, Segmentation and Recognition services. Useful for users who want to extract the image information directly.<br/>
 
-	```
-	$ virtualenv env
-	$ source env/bin/activate
-	```
+All microservices **handle images in memory** directly.<br/>
 
-2. Install requirement packages
-	
-	```
-	$ pip install -r requirements.txt
-	```
-	Note: Install one time under directory '/HuMaIN_Microservices/OCR/OCRopus/' for testing, or install three times under each 	microservice directory like '/HuMaIN_Microservices/OCR/OCRopus/BinarizationService/' for deployment.
+## Setup of Microservices
+Four ways (details are introduced in README.md of each microservice project):<br/>
 
-3. Apply updates for each microservice
+* Way-1: Deploy each microservice on the Django built-in server.<br/>
+Pros: quick to work.<br/>
+Cons: can only handle one request each time.<br/>
 
-	```
-	$ python manage.py makemigrations
-	$ python manage.py migrate
-	```
-	
-4. Run each microservice respectively
+* Way-2: Deploy each microservice on Apache server.<br/>
+Pros: can handle multiple requests concurrently.<br/>
 
-	For Binarization microservice: (under directory '/OCR/OCRopus/BinarizationService/')
-	```
-	$ python manage.py runserver 0.0.0.0:8001
-	```
-	For Segmentation microservice: (under directory '/OCR/OCRopus/SegmentationService/')
-	```
-	$ python manage.py runserver 0.0.0.0:8002
-	```
-	For Recognition microservice:  (under directory '/OCR/OCRopus/RecognitionService/')
-	```
-	$ python manage.py runserver 0.0.0.0:8003
-	```
+* Way-3: Deploy from Docker image.<br/>
+Pros: needn’t to download and deploy the microservice.<br/>
+
+* Way-4: Deploy with Kubernetes (K8s).<br/>
+Pros: can handle multiple requests concurrently, and auto-scale the number of instances of microservice to improve its performance remarkably.
+
+## Test Scripts
+For each microservice/application we created a scripte used to simulate to invoke the microservice. Besides, the scripts support to send multiple requests concurrently. All scriptes are under directory 'OCR/'. <br/>
+Take the Binarization service script as example, we can use the following command to check how to use it:<br/>
+```
+$ python call_bin_multiP.py --help
+```
+
+## Management of Microserivices Using K8s and Istio
+In the devolopment environment, we deployed these microservices on Kubernetes and manage them with Istio. We provided the there sample files *'ocr-gateway.yaml'*, *'route-rule-ocr.yaml'* and *'virtual-service-ocr.yaml'* under directory 'OCR/Istio-manifests/' to show how we configure the gateway and route rules in Istio.
