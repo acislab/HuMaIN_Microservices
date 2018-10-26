@@ -20,12 +20,12 @@
 # limitations under the License.
 ##########################################################################################
 import requests
-import argparse, os, sys
+import argparse, os, sys, subprocess
 import multiprocessing as mp
 
 # Binarization service URL
-IP = "10.5.146.92"
-PORT = "8101"
+IP = "localhost"
+PORT = "8000"
 URL_BIN = "http://" + IP + ":" + PORT + "/binarizationapi"
 SESSION = requests.Session()
 

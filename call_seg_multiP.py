@@ -21,7 +21,7 @@
 # limitations under the License.
 ##########################################################################################
 import requests, zipfile, StringIO
-import time, argparse, os
+import time, argparse, os, subprocess
 import multiprocessing as mp
 
 # Segmentation service URL
