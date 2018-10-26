@@ -1,0 +1,5 @@
+env
+testimages/*
+data/*
+log/*
+kube_manifest/*
