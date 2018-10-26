@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tesseract
+  labels:
+    app: tesseract
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: tesseract
+  template:
+    metadata:
+      labels:
+        app: tesseract
+    spec:
+      containers:
+      - name: tesseract
+        image: jingchaoluan/tesseract:v1
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            #memory: "1Gi"
+            cpu: "1"
+          requests:
+            memory: "256Mi"
+            cpu: "0.5"
+        securityContext:
+          privileged: true
+          capabilities:
+            add: ["SYS_ADMIN"]
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tesseract
+  labels:
+    app: tesseract
+spec:
+  type: NodePort
+  selector:
+    app: tesseract
+  ports:
+    - port: 80
+      nodePort: 31004
+      targetPort: 80
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tesseract-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: tesseract
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 80
+#    - type: Pods
+#      pods:
+#        metricName: packets-per-second
+#        targetAverageValue: 100
+#    - type: Object
+#      object:
+#        metricName: requests-per-second
+#        target:
+#          apiVersion: extensions/v1beta1
+#          kind: Ingress
+#          name: main-route
+#        targetValue: 1k
