@@ -20,7 +20,7 @@
         <p>Extract text from an image.</p>
         
         <h4>USAGE</h4>
-        <p>1. Call Tesseract OCR micro-service with url: "http://10.5.146.92:8000/tesseractapi".</p>
+        <p>1. Call Tesseract OCR micro-service with url: "http://{IP}:{PORT}/tesseractapi".</p>
         <p>2. Input:</p>
         <p class="two_tab"> 
             1) The image path, uploaded in form style. <br>
@@ -29,8 +29,8 @@
         <p class="two_tab"> An text file related to the image.</p>
         <p>4. Example: </p>
         <p class="two_tab"> 
-            1) Using script "call_tesseract_service.py" under directory "OCR/Tesseract/" directly, with command "python call_tesseract_service.py -h" to check how to use. <font color="red">Remenber</font> to change the IP and PORT inside the script.<br>
-            2) Using curl command. E.g. curl -F "<font color="red">image</font>=@<i>path_to_image</i>" -F "<font color="red">lang</font>=eng" -o <i>name_of_output_file</i> http://10.5.146.92:8000/tesseractapi</p>
+            1) Using script "call_tesseract.py", with command "python call_tesseract.py -h" to check how to use it. <font color="red">Remenber</font> to change the IP and PORT inside the script.<br>
+            2) Using curl command. E.g. curl -F "<font color="red">image</font>=@<i>path_to_image</i>" -F "<font color="red">lang</font>=eng" -o <i>name_of_output_file</i> http://{IP}:{PORT}/tesseractapi</p>
         
         <h4>LANGUAGES</h4>
         <table border="1" cellspacing="0" >
@@ -50,7 +50,7 @@
             </tr>
         </table>
         <h4><font color="red">NOTE</font></h4>
-        <p> 1) The uploaded image's name/key must be 'image'.</p>
+        <p> 1) The uploaded image's name/key must be <b>'image'</b>.</p>
         <p> 2) The value of parameter 'lang' must be same with the supported valued in the above table. For multiple languages, must be combined with symble <font color="red">'+'</font></p>
     </body>
 </html>
