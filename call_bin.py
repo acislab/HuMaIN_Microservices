@@ -24,8 +24,8 @@ import argparse, os, sys, subprocess
 import multiprocessing as mp
 
 # Binarization service URL
-IP = "localhost"
-PORT = "8000"
+IP = "10.5.146.92"
+PORT = "8101"
 URL_BIN = "http://" + IP + ":" + PORT + "/binarizationapi"
 SESSION = requests.Session()
 
