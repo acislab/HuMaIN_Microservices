@@ -1,5 +1,6 @@
 django>=1.11.15
 djangorestframework
+mod_wsgi
 
 # packages for tesseract wrapper: pyocr
 Pillow
