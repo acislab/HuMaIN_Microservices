@@ -2,8 +2,7 @@
 ##########################################################################################
 # Developer: Luan,Jingchao        Project: HuMaIN (http://humain.acis.ufl.edu)
 # Description: 
-#     Convert a image from grayscale to black and white, based on the default parameters or
-# parameters set by user.
+#     Extract text information from an image, based on Python Tesseract wrapper 'pyocr'.
 ##########################################################################################
 # Copyright 2017    Advanced Computing and Information Systems (ACIS) Lab - UF
 #                   (https://www.acis.ufl.edu/)
@@ -28,7 +27,7 @@ import pyocr.builders
 
 
 def tesseract_exec(image, parameters):
-	# Using Tesseract (sh) tool
+	# Using Tesseract (sh) tool by default
 	tesseract_tool = pyocr.get_available_tools()[0]
 
 	lang = 'eng' # defaul language: English
