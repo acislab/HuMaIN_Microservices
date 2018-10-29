@@ -1,7 +1,7 @@
 # [Binarization Microservice]
 The goal is to convert an image from grayscale to black and white. Usually as the first step of OCRopy. Implemented with Python and Django. Based on [OCRopy](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib).
 
-## [Set Up]
+## [Setup]
 #### Way-1: deploy on the Django built-in server directly.<br/>
 Pros: quick to work.<br/>
 Cons: can only handle one request each time.<br/>
