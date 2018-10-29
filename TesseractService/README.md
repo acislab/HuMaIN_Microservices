@@ -54,11 +54,11 @@ The Dockerfile have beed provided, you can built the image by yourself or just u
 #### Way-4: deploy with Kubernetes<br/>
 Pros: can handle multiple requests concurrently, and auto-scale the number of instances of microservice to improve its performance remarkably.<br/>
 Pre-requirements: Kubernetes cluster.<br/>
-The manifest file *'kube_manifest/tesseract.yaml'* have been provided, user only need to create the Binarization Deployment/Pods/Service/auto-scaler with command like:<br/>
+The manifest file *'kube_manifest/tesseract.yaml'* have been provided, user only need to create the Tesseract Deployment/Pods/Service/auto-scaler with command like:<br/>
 
     $ kubectl apply -f kube_manifest/tesseract.yaml
 
-Here we use **NodeType** type and the nodePort is *31001* which can be set by user.
+Here we use **NodeType** type and the nodePort is *31004* which can be set by user.
 
 ## [Accessing service]
 1. Access the service through URL: *http://{IP}:{PORT}/tesseractapi*<br/>
