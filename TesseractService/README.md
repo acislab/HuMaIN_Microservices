@@ -27,13 +27,21 @@ Cons: can only handle one request each time.<br/>
 #### Way-2: deploy on Apache server (or orther servers in which user need to customized the configuration file).<br/>
 Pros: can handle multiple requests concurrently.<br/>
 Pre-requirements: Apache server
-The first three steps same with Way-1.<br/>
+The first three steps same with Way-1. (The following steps are for Apache server on **CentOS**.)<br/>
 
-4). Copy configuration file *'apache_conf/tesseract.conf'* into directory *'/etc/httpd/conf.d/'*.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Here we only provide configuration file for Apache in Centos, for the other OS please customize the configuration file.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Besides, the listening port in *'apache_conf/tesseract.conf'* is *80*. Your can replace it with another port just remember to allow the port through firewall.<br/>
+4). Install pre-built Tesseract binariry package using script *install_tesseract_centos.sh*.<br/>
 
-5). Restart Apache server<br/>
+5). Copy configuration file *'apache_conf/tesseract.conf'* into directory *'/etc/httpd/conf.d/'*.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The listening port in *'apache_conf/tesseract.conf'* is *80*. User can replace it with another port just remember to allow the port accessible through firewall.<br/>
+
+6). Connect the mod_wsgi module with system Apache installation.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added the output of the following command to Apache configuration file *httpd.conf* whose path usually is *'/etc/httpd/conf.httpd.conf'*.<br/>
+
+    $ mod_wsgi-express module-config
+    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Reference:https://pypi.org/project/mod_wsgi/
+
+7). Restart Apache server.<br/>
 
 #### Way-3: set up from Docker image.<br/>
 Pros: needn’t to download and deploy the microservice.<br/>
