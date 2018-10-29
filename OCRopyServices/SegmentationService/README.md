@@ -1,5 +1,5 @@
 # [Segmentation Microservice]
-The goal is to extract the single-line images from a binarized image. Usually as a step of OCRopus. Implemented with Python and Django. Based on [OCRopy](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib).
+The goal is to extract the single-line images from a binarized image. Usually as a step of OCRopy. Implemented with Python and Django. Based on [OCRopy](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib).
 
 ## [Setup]
 #### Way-1: deploy on the Django built-in server directly.<br/>
@@ -29,7 +29,7 @@ Pros: can handle multiple requests concurrently.<br/>
 The first three steps same with Way-1. (The following steps are for Apache server on **CentOS**.)<br/>
 
 4). Copy configuration file *'apache_conf/segmentation.conf'* into directory *'/etc/httpd/conf.d/'*.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The listening port in *'apache_conf/segmentation.conf'* is *80*. User can replace it with another port just remember allowing the port through firewall.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The listening port in *'apache_conf/segmentation.conf'* is *80*. User can replace it with another port just remember to allow the port accessible through firewall.<br/>
 
 5). Connect the mod_wsgi module with system Apache installation.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added the output of the following command to Apache configuration file *httpd.conf* whose path usually is *'/etc/httpd/conf.httpd.conf'*.<br/>
