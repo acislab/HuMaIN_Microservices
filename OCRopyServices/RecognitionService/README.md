@@ -55,7 +55,7 @@ The manifest file *'kube_manifest/recognition.yaml'* have been provided, user on
 
     $ kubectl apply -f kube_manifest/recognition.yaml
 
-Here we use **NodeType** type and the nodePort is *31002* which can be set by user.
+Here we use **NodeType** type and the nodePort is *31003* which can be set by user.
 
 ## [Accessing service]
 1. Access the service through URL: *http://{IP}:{PORT}/recognitionapi*<br/>
