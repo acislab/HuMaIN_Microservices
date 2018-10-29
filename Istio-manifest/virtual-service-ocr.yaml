@@ -45,3 +45,19 @@ spec:
     - destination:
         host: recognition.default.svc.cluster.local
         subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: tesseract
+spec:
+  hosts:
+  - tesseract.default.svc.cluster.local
+  gateways:
+  - ocr-gateway
+  - mesh
+  http:
+  - route:
+    - destination:
+        host: tesseract.default.svc.cluster.local
+        subset: v1

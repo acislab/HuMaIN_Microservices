@@ -40,3 +40,9 @@ spec:
     route:
     - destination:
         host: recognition.default.svc.cluster.local
+  - match:
+    - uri:
+        exact: "/tesseractapi"
+    route:
+    - destination:
+        host: tesseract.default.svc.cluster.local
