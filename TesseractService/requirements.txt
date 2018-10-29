@@ -4,5 +4,5 @@ mod_wsgi
 
 # packages for tesseract wrapper: pyocr
 Pillow
+#tesseract # For CentOS, install using script 'install_tesseract_centos.sh'
 pyocr
-tesseract # Note: For CentOS/RedHat Linux distribution, using script 'install-tesseract-redhat-centos' to install tesseract

@@ -22,6 +22,10 @@ WORKDIR /TesseractService
 COPY . /TesseractService
 COPY apache_conf/tesseract.conf /etc/httpd/conf.d/
 
+# Install pre-built tesseract binary package
+RUN chmod +x /TesseractService/install_tesseract_centos.sh
+RUN /TesseractService/install_tesseract_centos.sh
+
 # Install needed packages specified in requirements.txt
 # Configure Apache to load mod_wsgi module
 RUN pip install --upgrade setuptools pip && \
