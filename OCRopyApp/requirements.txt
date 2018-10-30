@@ -1,0 +1,7 @@
+django>=1.11.15
+djangorestframework
+mod_wsgi
+
+requests
+opencv-python
+Pillow
