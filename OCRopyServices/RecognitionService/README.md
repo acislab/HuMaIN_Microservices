@@ -30,6 +30,7 @@ The first three steps same with Way-1. (The following steps are for Apache serve
 
 4). Copy configuration file *'apache_conf/recognition.conf'* into directory *'/etc/httpd/conf.d/'*.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Besides, the listening port in *'apache_conf/recognition.conf'* is *80*. user can replace it with another port just remember to allow the port accessable through firewall.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**NOTE**: Remeber to update the service related path for some directives like *DocumentRoot*, *Alias*, *wsgi.py*, *python-path*, *WSGIScriptAlias* etc. <br/>
 
 5). Connect the mod_wsgi module with system Apache installation.<br/>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added the output of the following command to Apache configuration file *httpd.conf* whose path usually is *'/etc/httpd/conf.httpd.conf'*.<br/>
