@@ -72,9 +72,6 @@ args_default = {
     'maxcolseps':3,  # maximum # whitespace column separators
     'csminheight':10.0,# minimum column height (units=scale)
 
-    # return type
-    'coordinate':False, # True: return segemented images' coordinates list. False: return segmented images
-
     # output parameters
     'pad':3,         # adding for extracted lines
     'expand':3,      # expand mask for grayscale extraction
