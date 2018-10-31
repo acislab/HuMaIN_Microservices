@@ -51,6 +51,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': (
+            'rest_framework.parsers.JSONParser',
+            'rest_framework.parsers.FormParser',
+            'rest_framework.parsers.MultiPartParser',
+        )
+}
+
 ROOT_URLCONF = 'OCRopyApp.urls'
 
 TEMPLATES = [
@@ -71,6 +79,40 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'OCRopyApp.wsgi.application'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'log/ocropy.log'),
+            'when': 'W0',
+            'backupCount': 52,
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'ocropy': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'ocropy.request': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
@@ -123,7 +165,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Service base urls
-OCROPY_SERVICE_BASE_URL = "http://ocropyservice.acis.ufl.edu"
+OCROPY_SERVICE_BASE_URL = "http://ocropyapp.acis.ufl.edu"
 
 ### custom variables
 # Absolute filesystem path to the directory that will hold user-uploaded files.

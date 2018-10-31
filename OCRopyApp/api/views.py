@@ -30,22 +30,43 @@ from django.http import HttpResponse
 from .ocropy import ocropy_exec
 import os
 
+# Get the directory which stores the model set by user
+dataDir = settings.MEDIA_ROOT
+
 def index(request):
     return render(request, 'index.html')
 
 @csrf_exempt
 @api_view(['GET', 'POST'])
 def ocropyView(request, format=None):
+    logger = logging.getLogger('ocropy')
     if request.data.get('image') is None:
+        logger.error("Please upload only one image")
         return Response("ERROR: Please upload only one image", status=status.HTTP_400_BAD_REQUEST)
 
     # Receive parameters
     parameters = request.data.dict() 
     del parameters['image'] # parameter 'image' will be processed seperately
+    if 'seg_usegauss' in keys:
+        keys.remove('seg_usegauss')
+    for key in parameters:
+        if key == "recog_height" or key == "recog_pad":
+            parameters[key] = int(parameters[key])
+            continue
+        parameters[key] = float(parameters[key])
+
+    ### Seperately receive and save model set by user
+    modelpath = None
+    if request.data.get('recog_model') is not None: 
+        model = request.data.get('recog_model')
+        modelpath = dataDir+"/"+str(model)
+        default_storage.save(modelpath, model)
     
+    ### Call OCRopy binarization function
     image_object = request.FILES['image']
     extract_result = ocropy_exec(image_object, parameters)
     if extract_result is None:
+        logger.error("sth wrong with ocropy")
         return Response("ERROR: sth wrong with OCRopus service", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
