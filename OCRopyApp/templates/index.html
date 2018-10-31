@@ -32,7 +32,7 @@
             1) Using script "call_ocropy.py", with command "python call_ocropy.py -h" to check how to use it. <font color="red">Remenber</font> to change the IP and PORT inside the script.<br>
             2) Using curl command. E.g. curl -F "<font color="red">image</font>=@<i>path_to_image</i>" -F "<font color="red">threshold</font>=0.5" -o <i>name_of_output_file</i> http://{IP}:{PORT}/ocropyapi</p>
         
-        <h4>PARAMETERS (#10)</h4>
+        <h4>PARAMETERS (#30)</h4>
         <table border="1" cellspacing="0" >
             <tr bgcolor="silver">
                 <th>Parameter</th>
@@ -41,64 +41,186 @@
                 <th>Comment</th>
             </tr>
             <tr>
-                <td>threshold</td>
+                <td>bin_threshold</td>
                 <td>Float</td>
                 <td align="center">0.5</td>
                 <td>threshold determines lightness</td>
             </tr>
             <tr>
-                <td>zoom</td>
+                <td>bin_zoom</td>
                 <td>Float</td>
                 <td align="center">0.5</td>
                 <td>zoom for page background estimation</td>
             </tr>
             <tr>
-                <td>escale</td>
+                <td>bin_escale</td>
                 <td>Float</td>
                 <td align="center">1.0</td>
                 <td>scale for estimating a mask over the text region</td>
             </tr>
             <tr>
-                <td>bignore</td>
+                <td>bin_bignore</td>
                 <td>Float</td>
                 <td align="center">0.1</td>
                 <td>ignore this much of the border for threshold estimation</td>
             </tr>
             <tr>
-                <td>perc</td>
+                <td>bin_perc</td>
                 <td>Float</td>
                 <td align="center">80.0</td>
                 <td>percentage for filters</td>
             </tr>
             <tr>
-                <td>range</td>
+                <td>bin_range</td>
                 <td>Integer</td>
                 <td align="center">20</td>
                 <td>range for filters</td>
             </tr>
             <tr>
-                <td>maxskew</td>
+                <td>bin_maxskew</td>
                 <td>Float</td>
                 <td align="center">2.0</td>
                 <td>skew angle estimation parameters</td>
             </tr>
             <tr>
-                <td>lo</td>
+                <td>bin_lo</td>
                 <td>Float</td>
                 <td align="center">5.0</td>
                 <td>percentile for black estimation</td>
             </tr>
             <tr>
-                <td>hi</td>
+                <td>bin_hi</td>
                 <td>Float</td>
                 <td align="center">90.0</td>
                 <td>percentile for white estimation</td>
             </tr>
             <tr>
-                <td>skewsteps</td>
+                <td>bin_skewsteps</td>
                 <td>Integer</td>
                 <td align="center">8</td>
                 <td>steps for skew angle estimation (per degree)</td>
+            </tr>
+
+            <tr>
+                <td>seg_minscale</td>
+                <td>Float</td>
+                <td align="center">1.0</td>
+                <td>minimum scale permitted</td>
+            </tr>
+            <tr>
+                <td>seg_maxlines</td>
+                <td>Integer</td>
+                <td align="center">300</td>
+                <td>maximum # lines permitted</td>
+            </tr>
+            <tr>
+                <td>seg_scale</td>
+                <td>Float</td>
+                <td  align="center">0.0</td>
+                <td>the basic scale of the document (roughly, xheight) 0=automatic</td>
+            </tr>
+            <tr>
+                <td>seg_hscale</td>
+                <td>Float</td>
+                <td align="center">1.0</td>
+                <td>non-standard scaling of horizontal parameters</td>
+            </tr>
+            <tr>
+                <td>seg_vscale</td>
+                <td>Float</td>
+                <td align="center">1.0</td>
+                <td>non-standard scaling of vertical parameters") # line parameters</td>
+            </tr>
+            <tr>
+                <td>seg_threshold</td>
+                <td>Float</td>
+                <td align="center">0.2</td>
+                <td>baseline threshold</td>
+            </tr>
+            <tr>
+                <td>seg_noise</td>
+                <td>Integer</td>
+                <td align="center">8</td>
+                <td>noise threshold for removing small components from lines</td>
+            </tr>
+            <tr>
+                <td>seg_usegause</td>
+                <td>Boolean</td>
+                <td align="center">True</td>
+                <td>use gaussian instead of uniform</td>
+            </tr>
+            <tr>
+                <td>seg_maxseps</td>
+                <td>Integer</td>
+                <td align="center">2</td>
+                <td>maximum # black column separators</td>
+            </tr>
+            <tr>
+                <td>seg_sepwiden</td>
+                <td>Integer</td>
+                <td align="center">10</td>
+                <td>widen black separators (to account for warping)</td>
+            </tr>
+            <tr>
+                <td>seg_maxcolseps</td>
+                <td>Integer</td>
+                <td align="center">3</td>
+                <td>maximum # whitespace column separators</td>
+            </tr>
+            <tr>
+                <td>seg_csminheight</td>
+                <td>Float</td>
+                <td align="center">10.0</td>
+                <td>minimum column height (units=scale)</td>
+            </tr>
+            <tr>
+                <td>seg_pad</td>
+                <td>Integer</td>
+                <td align="center">3</td>
+                <td>adding for extracted lines</td>
+            </tr>
+            <tr>
+                <td>seg_expand</td>
+                <td>Integer</td>
+                <td align="center">3</td>
+                <td>expand mask for grayscale extraction</td>
+            </tr>
+
+            <tr>
+                <td>recog_model</td>
+                <td>ZIP</td>
+                <td align="center">English</td>
+                <td>single-line image recognition model</td>
+            </tr>
+            <tr>
+                <td>recog_height</td>
+                <td>Integer</td>
+                <td align="center">-1</td>
+                <td>target line height (overrides recognizer)</td>
+            </tr>
+            <tr>
+                <td>recog_pad</td>
+                <td>Integer</td>
+                <td align="center">16</td>
+                <td>extra blank padding to the left and right of text line</td>
+            </tr>
+            <tr>
+                <td>recog_nonormalize</td>
+                <td>Boolean</td>
+                <td align="center">False</td>
+                <td>normalize the textual output from the recognizer</td>
+            </tr>
+            <tr>
+                <td>recog_llocs</td>
+                <td>Boolean</td>
+                <td align="center">False</td>
+                <td>output LSTM locations for characters</td>
+            </tr>
+            <tr>
+                <td>recog_probabilities</td>
+                <td>Boolean</td>
+                <td align="center">False</td>
+                <td>output probabilities for each letter</td>
             </tr>
         </table>
         
