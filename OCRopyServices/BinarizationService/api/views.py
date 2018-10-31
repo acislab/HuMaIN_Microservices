@@ -37,10 +37,6 @@ import logging
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-# Get the directory which stores all input and output files
-projectDir = settings.BASE_DIR
-dataDir = settings.MEDIA_ROOT
-
 def index(request):
     return render(request, 'index.html')
 
