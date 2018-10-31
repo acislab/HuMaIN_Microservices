@@ -33,7 +33,7 @@ The first three steps same with Way-1. (The following steps are for Apache serve
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**NOTE**: Remeber to update the service related path for some directives like *DocumentRoot*, *Alias*, *wsgi.py*, *python-path*, *WSGIScriptAlias* etc. <br/>
 
 5). Connect the mod_wsgi module with system Apache installation.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added the output of the following command to Apache configuration file *httpd.conf* whose path usually is *'/etc/httpd/conf.httpd.conf'*.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added the output of the following command to Apache configuration file *httpd.conf* whose path usually is *'/etc/httpd/conf/httpd.conf'*.<br/>
 
     $ mod_wsgi-express module-config
     
