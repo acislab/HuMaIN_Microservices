@@ -24,7 +24,7 @@ Cons: can only handle one request each time.<br/>
     $ python manage runserver 0.0.0.0:{PORT} (port can be customized)
     
 
-#### Way-2: deploy on Apache server (or orther servers in which user need to customized the configuration file).<br/>
+#### Way-2: deploy on Apache server.<br/>
 Pros: can handle multiple requests concurrently.<br/>
 Pre-requirements: Apache server
 The first three steps same with Way-1. (The following steps are for Apache server on **CentOS**.)<br/>
@@ -36,7 +36,7 @@ The first three steps same with Way-1. (The following steps are for Apache serve
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**NOTE**: Remeber to update the service related path for some directives like *DocumentRoot*, *Alias*, *wsgi.py*, *python-path*, *WSGIScriptAlias* etc. <br/>
 
 6). Connect the mod_wsgi module with system Apache installation.<br/>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added the output of the following command to Apache configuration file *httpd.conf* whose path usually is *'/etc/httpd/conf.httpd.conf'*.<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Added the output of the following command to Apache configuration file *httpd.conf* whose path usually is *'/etc/httpd/conf/httpd.conf'*.<br/>
 
     $ mod_wsgi-express module-config
     
