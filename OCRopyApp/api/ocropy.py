@@ -32,6 +32,7 @@ URL_BIN = "http://" + settings.BIN_IP + ":" + settings.BIN_PORT + "/binarization
 URL_SEG = "http://" + settings.SEG_IP + ":" + settings.SEG_PORT + "/segmentationapi"
 URL_RECOG = "http://" + settings.RECOG_IP + ":" + settings.RECOG_PORT + "/recognitionapi"
 
+logger = logging.getLogger('binarization')
 
 def ocropy_exec(image, parameters):
 	dataDir = settings.MEDIA_ROOT
@@ -70,10 +71,10 @@ def ocropy_exec(image, parameters):
 			for chunk in resp_bin:
 				fd.write(chunk)
 	else:
-		print("Image %s Binarization failed!" % image)
+		logger.error("Image %s Binarization failed!" % image)
 		shutil.rmtree(path_data)
 		return None
-	print("Binarization over!!!")
+	logger.info("Binarization over!!!")
 
 
 	#####################################
@@ -89,10 +90,10 @@ def ocropy_exec(image, parameters):
 		z = zipfile.ZipFile(StringIO.StringIO(resp_seg.content)) 
 		z.extractall(path_seg)
 	else:
-		print("Image %s Segmentation error!" % bin_img_name)
+		logger.error("Image %s Segmentation error!" % bin_img_name)
 		shutil.rmtree(path_data)
 		return None
-	print("Segmentation over!!!")
+	logger.info("Segmentation over!!!")
 
 	#####################################
 	##### Call recognition service ######
@@ -156,7 +157,7 @@ def call_recog(job):
 		z = zipfile.ZipFile(StringIO.StringIO(resp_recog.content))
 		z.extractall(dstDir)
 	else:
-		print("Image %s Recognition error!" % str(image))
+		logger.error("Image %s Recognition error!" % str(image))
 
 
 def cropImage(imagepath, index, x, y, width, height):
