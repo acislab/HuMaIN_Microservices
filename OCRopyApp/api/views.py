@@ -28,7 +28,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
 from django.conf import settings
-from .extrafunc import resize_image, del_service_files
+from .extrafunc import del_service_files
 from .ocropy import ocropy_exec
 import os, logging
 
@@ -72,17 +72,12 @@ def ocropyView(request, format=None):
     
     ### Call OCRopy binarization function
     image_object = request.FILES['image']
-    try:
-        image_object = resize_image(image_object)
-    except:
-        logger.error("Re-size image error")
-        return Response("ERROR: Re-size image error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     extract_result = ocropy_exec(image_object, parameters)
     if extract_result is None:
         if modelpath is not None:
             del_service_files(modelpath)
         logger.error("sth wrong with ocropy")
-        return Response("ERROR: sth wrong with OCRopus service", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response("ERROR: sth wrong with OCRopy", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     # Return result from memory directly
