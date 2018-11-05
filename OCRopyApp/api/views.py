@@ -56,10 +56,6 @@ def ocropyView(request, format=None):
         keys.remove('recog_model')
     if 'recog_nonormalize' in keys:
         keys.remove('recog_nonormalize')
-    if 'recog_llocs' in keys:
-        keys.remove('recog_llocs')
-    if 'recog_probabilities' in keys:
-        keys.remove('recog_probabilities')
     for key in keys:
         parameters[key] = float(parameters[key])
 

@@ -32,7 +32,7 @@
             1) Using script "call_ocropy.py", with command "python call_ocropy.py -h" to check how to use it. <font color="red">Remenber</font> to change the IP and PORT inside the script.<br>
             2) Using curl command. E.g. curl -F "<font color="red">image</font>=@<i>path_to_image</i>" -F "<font color="red">threshold</font>=0.5" -o <i>name_of_output_file</i> http://{IP}:{PORT}/ocropyapi</p>
         
-        <h4>PARAMETERS (#30)</h4>
+        <h4>PARAMETERS (#28)</h4>
         <table border="1" cellspacing="0" >
             <tr bgcolor="silver">
                 <th>Parameter</th>
@@ -209,18 +209,6 @@
                 <td>Boolean</td>
                 <td align="center">False</td>
                 <td>normalize the textual output from the recognizer</td>
-            </tr>
-            <tr>
-                <td>recog_llocs</td>
-                <td>Boolean</td>
-                <td align="center">False</td>
-                <td>output LSTM locations for characters</td>
-            </tr>
-            <tr>
-                <td>recog_probabilities</td>
-                <td>Boolean</td>
-                <td align="center">False</td>
-                <td>output probabilities for each letter</td>
             </tr>
         </table>
         
