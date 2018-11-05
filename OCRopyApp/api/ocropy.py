@@ -26,13 +26,14 @@ from itertools import product
 from contextlib import contextmanager
 import cv2, zipfile, StringIO
 import io, os, subprocess, glob, shutil
+import logging
 
 ### URL of Binarization/Segmentation/Recognition services
 URL_BIN = "http://" + settings.BIN_IP + ":" + settings.BIN_PORT + "/binarizationapi"
 URL_SEG = "http://" + settings.SEG_IP + ":" + settings.SEG_PORT + "/segmentationapi"
 URL_RECOG = "http://" + settings.RECOG_IP + ":" + settings.RECOG_PORT + "/recognitionapi"
 
-logger = logging.getLogger('binarization')
+logger = logging.getLogger('ocropy')
 
 def ocropy_exec(image, parameters):
 	dataDir = settings.MEDIA_ROOT
@@ -62,6 +63,8 @@ def ocropy_exec(image, parameters):
 	#####################################
 	##### Call binarization service #####
 	#####################################
+	print(URL_BIN)
+	print(type(image))
 	resp_bin = requests.get(URL_BIN, files={'image': image}, data=paras_bin)
 	img_bin_name = img_base + "_bin.png"
 	img_bin_path = os.path.join(path_data, img_bin_name)
@@ -112,11 +115,12 @@ def ocropy_exec(image, parameters):
 		#call_recog((img_seg_path, paras_recog, path_recog)) # single process
 		jobs.append((img_seg_path, paras_recog, path_recog))
 	# Call recognition service with multiple processes, # processes = # CPU by default
-	pool = mp.Pool(processes=4)
+	pool = mp.Pool()
 	pool.map(call_recog, jobs)
 	# Close pool of processes after they are finished
 	pool.close()
 	pool.join()
+	logger.info("Recognition over!!!")
 
 	
 	##########################################################
