@@ -28,8 +28,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import HttpResponse
 from django.conf import settings
+from .extrafunc import resize_image, del_service_files
 from .ocropy import ocropy_exec
-import os
+import os, logging
 
 # Get the directory which stores the model set by user
 dataDir = settings.MEDIA_ROOT
@@ -48,12 +49,18 @@ def ocropyView(request, format=None):
     # Receive parameters
     parameters = request.data.dict() 
     del parameters['image'] # parameter 'image' will be processed seperately
+    keys = parameters.keys()
     if 'seg_usegauss' in keys:
         keys.remove('seg_usegauss')
-    for key in parameters:
-        if key == "recog_height" or key == "recog_pad":
-            parameters[key] = int(parameters[key])
-            continue
+    if 'recog_model' in keys:
+        keys.remove('recog_model')
+    if 'recog_nonormalize' in keys:
+        keys.remove('recog_nonormalize')
+    if 'recog_llocs' in keys:
+        keys.remove('recog_llocs')
+    if 'recog_probabilities' in keys:
+        keys.remove('recog_probabilities')
+    for key in keys:
         parameters[key] = float(parameters[key])
 
     ### Seperately receive and save model set by user
@@ -65,8 +72,15 @@ def ocropyView(request, format=None):
     
     ### Call OCRopy binarization function
     image_object = request.FILES['image']
+    try:
+        image_object = resize_image(image_object)
+    except:
+        logger.error("Re-size image error")
+        return Response("ERROR: Re-size image error", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     extract_result = ocropy_exec(image_object, parameters)
     if extract_result is None:
+        if modelpath is not None:
+            del_service_files(modelpath)
         logger.error("sth wrong with ocropy")
         return Response("ERROR: sth wrong with OCRopus service", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -76,5 +90,9 @@ def ocropyView(request, format=None):
     extract_name = img_base + ".txt"
     response = HttpResponse(extract_result, content_type="text/plain")
     response['Content-Disposition'] = 'attachment; filename=%s' % extract_name
-    
+
+    # Delete recognized model if it was uploaded by user
+    if modelpath is not None:
+            del_service_files(modelpath)
+
     return response
