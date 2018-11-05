@@ -2,7 +2,7 @@
 Reusable information extraction and image processing microservices. Based on [OCRopy](https://github.com/tmbdev/ocropy) and its library [ocrolib](https://github.com/tmbdev/ocropy/tree/master/ocrolib) and [Tesseract](https://github.com/tesseract-ocr/tesseract)
 
 Containing:<br/>
-1) Four microservices: Binarization, Segemntation, Recognition and Tesseract services.<br/>
+1) Four microservices: Binarization, Segemntation, Recognition (OCRopy related services) and Tesseract services.<br/>
 2) One OCRopy application, which implemented by invoking Binarization, Segmentation and Recognition services. Useful for users who want to use OCRopy to extract the image information directly.<br/>
 
 All microservices **handle images in memory** directly.<br/>
