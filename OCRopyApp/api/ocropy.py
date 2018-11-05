@@ -63,8 +63,6 @@ def ocropy_exec(image, parameters):
 	#####################################
 	##### Call binarization service #####
 	#####################################
-	print(URL_BIN)
-	print(type(image))
 	resp_bin = requests.get(URL_BIN, files={'image': image}, data=paras_bin)
 	img_bin_name = img_base + "_bin.png"
 	img_bin_path = os.path.join(path_data, img_bin_name)
